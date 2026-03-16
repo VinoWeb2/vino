@@ -1,6 +1,7 @@
 # vino
 
-### Auteur
+### Auteurs
 
 Elodie Buczkowski
+Élodie Daigle
 Patrik Greszta
