@@ -1,3 +1,5 @@
 # vino
 
-Marie-Andrée Healey-Côté
+### Auteur
+
+Elodie Buczkowski
