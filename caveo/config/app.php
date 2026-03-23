@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Facade;
+use Illuminate\Support\ServiceProvider;
 
 return [
 
@@ -57,6 +58,7 @@ return [
     'url' => env('APP_URL', 'http://localhost'),
 
     'asset_url' => env('ASSET_URL', '/'),
+    'asset_url' => env('ASSET_URL'),
 
     /*
     |--------------------------------------------------------------------------
@@ -141,6 +143,7 @@ return [
     'maintenance' => [
         'driver' => 'file',
         // 'store'  => 'redis',
+        // 'store' => 'redis',
     ],
 
     /*
@@ -182,6 +185,7 @@ return [
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
 
+    'providers' => ServiceProvider::defaultProviders()->merge([
         /*
          * Package Service Providers...
          */
@@ -196,6 +200,7 @@ return [
         App\Providers\RouteServiceProvider::class,
 
     ],
+    ])->toArray(),
 
     /*
     |--------------------------------------------------------------------------
@@ -210,6 +215,7 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         // 'ExampleClass' => App\Example\ExampleClass::class,
+        // 'Example' => App\Facades\Example::class,
     ])->toArray(),
 
 ];
