@@ -3,12 +3,19 @@
 use App\Models\Bouteille;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\BouteilleController;
 
 function trouverAttribut(array $attributes, string $nomRecherche): ?string
 {
     foreach ($attributes as $attribute) {
         if (($attribute['name'] ?? '') === $nomRecherche) {
-            return $attribute['value'] ?? null;
+          $value = $attribute['value'] ?? null;
+
+          if (is_array($value)){
+            return implode(', ', $value);
+          }
+
+            return $value;
         }
     }
 
@@ -79,17 +86,19 @@ Route::get('/test-saq', function () {
         $cepage = trouverAttribut($attributes, 'cepage');
         $millesime = trouverAttribut($attributes, 'millesime_produit');
         $alcool = trouverAttribut($attributes, 'pourcentage_alcool_par_volume');
+        $type = trouverAttribut($attributes, 'identite_produit');
 
         Bouteille::updateOrCreate(
             [
-                'code_saq' => $item['productView']['sku'],
+                'code_saq' => $item['product']['sku'],
             ],
             [
                 'nom' => $item['productView']['name'],
+                'type' => $type,
                 'pays' => $pays,
                 'cepage' => $cepage,
                 'millesime' => is_numeric($millesime) ? (int) $millesime : null,
-                'alcool' => is_numeric($alcool) ? (float) $alcool : null,
+                'taux_alcool' => is_numeric($alcool) ? (float) $alcool : null,
                 'prix' => $item['product']['price_range']['minimum_price']['regular_price']['value'] ?? null,
                 'est_saq' => true,
             ]
