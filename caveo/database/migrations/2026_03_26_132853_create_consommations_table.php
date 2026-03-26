@@ -13,7 +13,10 @@ return new class extends Migration
     {
         Schema::create('consommations', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->unsignedBigInteger('id_inventaire');
+            $table->integer('quantite');
+            $table->timestamp('date');
+            $table->foreign('id_inventaire')->references('id')->on('inventaires')->onDelete('cascade');
         });
     }
 

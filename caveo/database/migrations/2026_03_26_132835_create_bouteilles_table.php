@@ -13,7 +13,18 @@ return new class extends Migration
     {
         Schema::create('bouteilles', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->string('nom', 255);
+            $table->string('type', 100);
+            $table->string('pays', 100);
+            $table->year('millesime')->nullable();
+            $table->text('cepage')->nullable();
+            $table->decimal('taux_alcool', 2, 2)->nullable();
+            $table->integer('format')->nullable();
+            $table->decimal('prix', 4, 2)->nullable();
+            $table->text('image')->nullable();
+            $table->boolean('est_saq');
+            $table->string('pastille_gout', 100)->nullable();
+            $table->string('code_saq', 50)->unique()->nullable();
         });
     }
 

@@ -12,8 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('inventaires', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+            $table->id(); 
+            $table->unsignedBigInteger('id_cellier');
+            $table->unsignedBigInteger('id_bouteille');
+            $table->integer('quantite');
+            $table->text('description')->nullable();
+            $table->timestamp('date_ajout')->useCurrent();
+            $table->foreign('id_cellier')->references('id')->on('celliers')->onDelete('cascade');
+            $table->foreign('id_bouteille')->references('id')->on('bouteilles');
         });
     }
 

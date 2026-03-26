@@ -13,7 +13,11 @@ return new class extends Migration
     {
         Schema::create('celliers', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->string('nom', 75);
+            $table->unsignedBigInteger('id_utilisateur');
+            $table->text('description');
+            $table->string('emplacement', 55);
+            $table->foreign('id_utilisateur')->references('id')->on('utilisateurs')->onDelete('cascade');
         });
     }
 

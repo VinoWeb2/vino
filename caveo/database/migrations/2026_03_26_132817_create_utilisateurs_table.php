@@ -13,7 +13,13 @@ return new class extends Migration
     {
         Schema::create('utilisateurs', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->string('prenom', 35);
+            $table->string('nom', 35);
+            $table->string('email', 255)->unique();
+            $table->string('mot_de_passe');
+            $table->unsignedBigInteger('id_role');
+            $table->timestamp('date_creation')->useCurrent();
+            $table->foreign('id_role')->references('id')->on('roles');
         });
     }
 
