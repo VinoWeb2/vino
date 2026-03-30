@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -17,7 +18,7 @@
         </h1>
     </header>
 
-    <main class="flex-grow bg-[#FCF8F7]">
+    <main class="grow bg-[#FCF8F7]">
         @yield('content')
     </main>
 
@@ -50,4 +51,5 @@
         </div>
     </footer>
 </body>
+
 </html>
