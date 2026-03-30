@@ -4,14 +4,15 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
     public function up(): void
     {
-        Schema::table('bouteilles', function (Blueprint $table) {
-            $table->decimal('alcool', 5, 2)->nullable()->after('millesime');
+        Schema::table('inventaires', function (Blueprint $table) {
+            $table->dropColumn('description');
         });
     }
 
@@ -20,8 +21,8 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::table('bouteilles', function (Blueprint $table) {
-            $table->dropColumn('alcool');
+        Schema::table('inventaires', function (Blueprint $table) {
+            $table->text('description')->nullable();
         });
     }
 };
