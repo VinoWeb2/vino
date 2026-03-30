@@ -7,131 +7,129 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use Throwable;
 
+/**
+ * Commande Artisan permettant d'importer les vins depuis l'API SAQ.
+ *
+ * Cette commande :
+ * - récupère les produits SAQ par pagination ;
+ * - filtre pour conserver uniquement les vins ;
+ * - nettoie certaines valeurs avant insertion ;
+ * - met à jour les bouteilles existantes ou en crée de nouvelles ;
+ * - évite les doublons grâce à updateOrCreate().
+ *
+ * Utilisation :
+ * php artisan saq:import
+ */
 class ImporterSaq extends Command
 {
+  /**
+   * Signature de la commande Artisan.
+   *
+   * @var string
+   */
   protected $signature = 'saq:import';
-  protected $description = 'Importer une sélection de 50 vins depuis la SAQ';
 
-  public function handle()
+  /**
+   * Description de la commande.
+   *
+   * @var string
+   */
+  protected $description = 'Importer toutes les bouteilles de vin depuis la SAQ';
+
+  /**
+   * Taille de page utilisée pour les requêtes paginées.
+   *
+   * @var int
+   */
+  private const TAILLE_PAGE = 50;
+
+  /**
+   * Limite de sécurité pour éviter une boucle infinie
+   * si l'API se comporte de façon inattendue.
+   *
+   * @var int
+   */
+  private const LIMITE_PAGES_SECURITE = 500;
+
+  /**
+   * Point d'entrée principal de la commande.
+   *
+   * Logique :
+   * - appelle l'API SAQ page par page ;
+   * - arrête l'import lorsqu'il n'y a plus de résultats
+   *   ou lorsqu'une page contient moins d'items que la taille demandée ;
+   * - filtre les produits non pertinents ;
+   * - crée ou met à jour les bouteilles en base de données.
+   *
+   * @return int
+   */
+  public function handle(): int
   {
     try {
       $page = 1;
-      $pageSize = 50;
+      $pageSize = self::TAILLE_PAGE;
       $totalImporte = 0;
       $totalIgnores = 0;
 
-      $this->info("Import de {$pageSize} produits maximum...");
+      do {
+        $this->info("Import de la page {$page}...");
 
-      $query = <<<GRAPHQL
-            {
-              productSearch(phrase: "", page_size: $pageSize, current_page: $page) {
-                items {
-                  productView {
-                    name
-                    sku
-                    attributes {
-                      label
-                      name
-                      value
-                    }
-                  }
-                  product {
-                    sku
-                    image {
-                      url
-                    }
-                    price_range {
-                      minimum_price {
-                        regular_price {
-                          value
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-            GRAPHQL;
+        $response = $this->envoyerRequeteSaq($page, $pageSize);
 
-      $response = Http::withOptions([
-        'verify' => false,
-        'curl' => [
-          CURLOPT_SSL_VERIFYPEER => false,
-          CURLOPT_SSL_VERIFYHOST => 0,
-        ],
-      ])->withHeaders([
-        'x-api-key' => env('SAQ_API_KEY'),
-        'magento-customer-group' => env('SAQ_CUSTOMER_GROUP'),
-        'magento-environment-id' => env('SAQ_ENVIRONMENT_ID'),
-        'magento-store-code' => env('SAQ_STORE_CODE'),
-        'magento-store-view-code' => env('SAQ_STORE_VIEW_CODE'),
-        'magento-website-code' => env('SAQ_WEBSITE_CODE'),
-        'Content-Type' => 'application/json',
-      ])->post(env('SAQ_GRAPHQL_URL'), [
-        'query' => $query,
-      ]);
+        if ($response->failed()) {
+          $this->error("Erreur API SAQ à la page {$page}.");
+          $this->line($response->body());
 
-      if ($response->failed()) {
-        $this->error('Erreur lors de la requête à la SAQ.');
-        $this->line($response->body());
-        return self::FAILURE;
-      }
-
-      $data = $response->json();
-      $items = $data['data']['productSearch']['items'] ?? [];
-
-      $this->info('Nombre d’items reçus : ' . count($items));
-
-      foreach ($items as $item) {
-        $attributes = $item['productView']['attributes'] ?? [];
-
-        $codeSaq = $item['productView']['sku'] ?? null;
-        $nom = $item['productView']['name'] ?? null;
-
-        $type = $this->trouverAttribut($attributes, 'identite_produit');
-        $pays = $this->trouverAttribut($attributes, 'pays_origine');
-        $cepage = $this->trouverAttribut($attributes, 'cepage');
-        $millesime = $this->trouverAttribut($attributes, 'millesime_produit');
-        $tauxAlcool = $this->trouverAttribut($attributes, 'pourcentage_alcool_par_volume');
-        $format = $this->trouverAttribut($attributes, 'format_contenant_ml');
-        $pastilleGout = $this->trouverAttribut($attributes, 'pastille_gout');
-        $image = $item['product']['image']['url'] ?? null;
-
-        if (empty($codeSaq) || empty($nom) || empty($type)) {
-          $totalIgnores++;
-          continue;
+          return self::FAILURE;
         }
 
-        if (!$this->estUnVin($type)) {
-          $totalIgnores++;
-          continue;
+        $data = $response->json();
+        $items = $data['data']['productSearch']['items'] ?? [];
+
+        if (empty($items)) {
+          $this->info("Aucun item retourné à la page {$page}. Fin de l'import.");
+          break;
         }
 
-        Bouteille::updateOrCreate(
-          [
-            'code_saq' => $codeSaq,
-          ],
-          [
-            'nom' => $nom,
-            'type' => $type,
-            'pays' => $pays,
-            'cepage' => $cepage,
-            'millesime' => is_numeric($millesime) ? (int) $millesime : null,
-            'taux_alcool' => $this->nettoyerDecimal($tauxAlcool),
-            'prix' => $item['product']['price_range']['minimum_price']['regular_price']['value'] ?? null,
-            'format' => $this->nettoyerEntier($format),
-            'image' => $image,
-            'pastille_gout' => $pastilleGout,
-            'est_saq' => true,
-          ]
-        );
+        foreach ($items as $item) {
+          if ($this->traiterItem($item)) {
+            $totalImporte++;
+          } else {
+            $totalIgnores++;
+          }
+        }
 
-        $totalImporte++;
-      }
+        $this->info("Page {$page} terminée. Importés : {$totalImporte} | Ignorés : {$totalIgnores}");
 
-      $this->info("Import terminé avec succès.");
-      $this->info("Nombre de vins importés : {$totalImporte}");
-      $this->info("Nombre d’items ignorés : {$totalIgnores}");
+        /*
+                 * Condition d'arrêt fiable :
+                 * si l'API retourne moins d'items que demandé,
+                 * on considère qu'on a atteint la dernière page.
+                 */
+        if (count($items) < $pageSize) {
+          $this->info('Dernière page atteinte.');
+          break;
+        }
+
+        $page++;
+
+        /*
+                 * Petite pause pour limiter la charge sur l'API distante.
+                 */
+        sleep(1);
+
+        /*
+                 * Arrêt de sécurité pour éviter une boucle infinie.
+                 */
+        if ($page > self::LIMITE_PAGES_SECURITE) {
+          $this->warn('Arrêt de sécurité atteint : limite maximale de pages dépassée.');
+          break;
+        }
+      } while (true);
+
+      $this->info('Import terminé avec succès.');
+      $this->info("Nombre total de vins importés : {$totalImporte}");
+      $this->info("Nombre total d’items ignorés : {$totalIgnores}");
 
       return self::SUCCESS;
     } catch (Throwable $e) {
@@ -143,6 +141,145 @@ class ImporterSaq extends Command
     }
   }
 
+  /**
+   * Envoie une requête GraphQL à l'API SAQ pour une page donnée.
+   *
+   * @param int $page Numéro de page à récupérer.
+   * @param int $pageSize Nombre d'items par page.
+   * @return \Illuminate\Http\Client\Response
+   */
+  private function envoyerRequeteSaq(int $page, int $pageSize)
+  {
+    $query = <<<GRAPHQL
+        {
+          productSearch(phrase: "", page_size: $pageSize, current_page: $page) {
+            items {
+              productView {
+                name
+                sku
+                attributes {
+                  label
+                  name
+                  value
+                }
+              }
+              product {
+                image {
+                  url
+                }
+                price_range {
+                  minimum_price {
+                    regular_price {
+                      value
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        GRAPHQL;
+
+    return Http::withOptions([
+      /*
+             * Désactivation de la vérification SSL en environnement local.
+             * À éviter en production.
+             */
+      'verify' => false,
+    ])->withHeaders([
+      'x-api-key' => env('SAQ_API_KEY'),
+      'magento-customer-group' => env('SAQ_CUSTOMER_GROUP'),
+      'magento-environment-id' => env('SAQ_ENVIRONMENT_ID'),
+      'magento-store-code' => env('SAQ_STORE_CODE'),
+      'magento-store-view-code' => env('SAQ_STORE_VIEW_CODE'),
+      'magento-website-code' => env('SAQ_WEBSITE_CODE'),
+      'Content-Type' => 'application/json',
+    ])->post(env('SAQ_GRAPHQL_URL'), [
+      'query' => $query,
+    ]);
+  }
+
+  /**
+   * Traite un item retourné par l'API SAQ.
+   *
+   * Cette méthode :
+   * - extrait les attributs utiles ;
+   * - valide les informations minimales requises ;
+   * - filtre les produits pour conserver uniquement les vins ;
+   * - prépare les données ;
+   * - exécute l'insertion ou la mise à jour.
+   *
+   * @param array $item
+   * @return bool True si l'item a été importé, false s'il a été ignoré.
+   */
+  private function traiterItem(array $item): bool
+  {
+    $attributes = $item['productView']['attributes'] ?? [];
+
+    $codeSaq = $item['productView']['sku'] ?? null;
+    $nom = $item['productView']['name'] ?? null;
+
+    $type = $this->trouverAttribut($attributes, 'identite_produit');
+    $pays = $this->trouverAttribut($attributes, 'pays_origine');
+    $cepage = $this->trouverAttribut($attributes, 'cepage');
+    $millesime = $this->trouverAttribut($attributes, 'millesime_produit');
+    $tauxAlcool = $this->trouverAttribut($attributes, 'pourcentage_alcool_par_volume');
+    $format = $this->trouverAttribut($attributes, 'format_contenant_ml');
+    $pastilleGout = $this->trouverAttribut($attributes, 'pastille_gout');
+
+    $image = $item['product']['image']['url'] ?? null;
+    $image = $this->normaliserUrlImage($image);
+
+    /*
+         * Validation minimale.
+         */
+    if (empty($codeSaq) || empty($nom) || empty($type)) {
+      return false;
+    }
+
+    /*
+         * Conserver uniquement les vins.
+         */
+    if (!$this->estUnVin($type)) {
+      return false;
+    }
+
+    Bouteille::updateOrCreate(
+      [
+        'code_saq' => $codeSaq,
+      ],
+      [
+        'nom' => $nom,
+        'type' => $type,
+        'pays' => $pays,
+        'cepage' => $cepage,
+        'millesime' => is_numeric($millesime) ? (int) $millesime : null,
+        'taux_alcool' => $this->nettoyerDecimal($tauxAlcool),
+        'prix' => $this->nettoyerDecimal(
+          isset($item['product']['price_range']['minimum_price']['regular_price']['value'])
+            ? (string) $item['product']['price_range']['minimum_price']['regular_price']['value']
+            : null
+        ),
+        'format' => $this->nettoyerEntier($format),
+        'image' => $image,
+        'pastille_gout' => $pastilleGout,
+        'est_saq' => true,
+      ]
+    );
+
+    return true;
+  }
+
+  /**
+   * Recherche la valeur d'un attribut donné dans la liste des attributs SAQ.
+   *
+   * Si la valeur reçue est un tableau, elle est convertie en chaîne
+   * séparée par des virgules.
+   *
+   * @param array $attributes Liste des attributs du produit.
+   * @param string $nomRecherche Nom technique de l'attribut recherché.
+   * @return string|null
+   */
   private function trouverAttribut(array $attributes, string $nomRecherche): ?string
   {
     foreach ($attributes as $attribute) {
@@ -160,6 +297,16 @@ class ImporterSaq extends Command
     return null;
   }
 
+  /**
+   * Nettoie une valeur décimale.
+   *
+   * Exemples :
+   * - "13,5%" devient 13.5
+   * - "60.2" devient 60.2
+   *
+   * @param string|null $valeur
+   * @return float|null
+   */
   private function nettoyerDecimal(?string $valeur): ?float
   {
     if ($valeur === null || $valeur === '') {
@@ -171,6 +318,15 @@ class ImporterSaq extends Command
     return is_numeric($valeur) ? (float) $valeur : null;
   }
 
+  /**
+   * Nettoie une valeur entière.
+   *
+   * Exemple :
+   * - "750 ml" devient 750
+   *
+   * @param string|null $valeur
+   * @return int|null
+   */
   private function nettoyerEntier(?string $valeur): ?int
   {
     if ($valeur === null || $valeur === '') {
@@ -182,6 +338,12 @@ class ImporterSaq extends Command
     return is_numeric($valeur) ? (int) $valeur : null;
   }
 
+  /**
+   * Vérifie si le type de produit correspond à un vin.
+   *
+   * @param string $type
+   * @return bool
+   */
   private function estUnVin(string $type): bool
   {
     $type = mb_strtolower(trim($type));
@@ -205,5 +367,28 @@ class ImporterSaq extends Command
     }
 
     return false;
+  }
+
+  /**
+   * Normalise l'URL d'image retournée par l'API.
+   *
+   * Certaines images sont retournées sous la forme :
+   * //www.saq.com/...
+   * Cette méthode ajoute alors le protocole https:.
+   *
+   * @param string|null $image
+   * @return string|null
+   */
+  private function normaliserUrlImage(?string $image): ?string
+  {
+    if ($image === null || $image === '') {
+      return null;
+    }
+
+    if (str_starts_with($image, '//')) {
+      return 'https:' . $image;
+    }
+
+    return $image;
   }
 }
