@@ -5,6 +5,7 @@ use App\Models\Bouteille;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BouteilleController;
+use App\Http\Requests\InscriptionRequest;
 
 /*
 |--------------------------------------------------------------------------
@@ -60,6 +61,20 @@ function trouverAttribut(array $attributes, string $nomRecherche): ?string
 Route::get('/', function () {
   return view('welcome');
 });
+
+/**
+ * Afficher le formulaire d'inscription (UI seulement) et traiter la soumission.
+ * La page utilise le layout `layouts.main` (header/footer inchangés).
+ */
+Route::get('/inscription', function () {
+  return view('auth.inscription');
+})->name('inscription.form');
+
+Route::post('/inscription', function (InscriptionRequest $request) {
+  $data = $request->validated();
+  // Validation : gérée par `InscriptionRequest`
+    return;
+  });
 
 /**
  * Route de test temporaire pour valider la connexion à l'API SAQ
