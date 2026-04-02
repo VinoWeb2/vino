@@ -2,10 +2,16 @@
 
 use App\Http\Controllers\Admin\InventaireSaqController;
 use App\Models\Bouteille;
+use App\Models\Utilisateur;
+use App\Models\Role;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BouteilleController;
 use App\Http\Requests\InscriptionRequest;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 /*
 |--------------------------------------------------------------------------
@@ -73,8 +79,27 @@ Route::get('/inscription', function () {
 Route::post('/inscription', function (InscriptionRequest $request) {
   $data = $request->validated();
   // Validation : gérée par `InscriptionRequest`
-    return;
+  // Créer l'utilisateur dans la table `utilisateurs`
+  $utilisateur = DB::transaction(function () use ($data) {
+    // Récupère l'id du rôle 'user' (si absent, on suppose id=2 par défaut)
+    $roleId = Role::where('nom', 'user')->value('id') ?? 2;
+
+    return Utilisateur::create([
+      'prenom' => $data['prenom'] ?? '',
+      'nom' => $data['nom'] ?? '',
+      'email' => $data['courriel'],
+      'mot_de_passe' => Hash::make($data['mot_de_passe']),
+      'id_role' => $roleId,
+    ]);
   });
+
+  // Déclenche l'événement Laravel `Registered` puis connecte l'utilisateur.
+  event(new Registered($utilisateur));
+  Auth::login($utilisateur);
+
+  // Renvoyer sur la même page et afficher une alerte de succès
+  return back()->with('status', 'Compte créé avec succès.');
+})->name('inscription.submit');
 
 /**
  * Route de test temporaire pour valider la connexion à l'API SAQ
