@@ -1,1 +1,19 @@
 @import "tailwindcss";
+
+/* Polices : h1 utilise Crimson Text, le reste utilise Roboto */
+h1 {
+	font-family: 'Crimson Text', Georgia, 'Times New Roman', Times, serif;
+}
+
+/* Appliquer Roboto uniquement au conteneur principal des cartes et éléments associés */
+.max-w-md,
+.max-w-md input,
+.max-w-md select,
+.max-w-md textarea,
+.max-w-md button,
+.max-w-md label,
+.max-w-md p,
+.max-w-md h2,
+.max-w-md h3 {
+	font-family: 'Roboto', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
