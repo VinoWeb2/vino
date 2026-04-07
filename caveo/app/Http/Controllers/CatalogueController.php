@@ -11,21 +11,48 @@ class CatalogueController extends Controller
      /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        // Base de la requête
+    public function index(){
         $query = Bouteille::query();
 
-        // Si un terme de recherche est présent
+        // Recherche texte
         if ($search = request('recherche')) {
-            // Filtre les noms qui commencent par la recherche
             $query->where('nom', 'like', $search . '%');
         }
 
-        // Pagination + conservation du paramètre de recherche
+        // Filtre par types (OU)
+        if ($types = request('types')) {
+            $query->whereIn('type', $types);
+        }
+
+        // Filtre par pays (OU)
+        if ($pays = request('pays')) {
+            $query->whereIn('pays', $pays);
+        }
+
+        // Filtre par formats (OU)
+        if ($formats = request('formats')) {
+            $query->whereIn('format', $formats);
+        }
+
+        // Filtre par millésimes (OU)
+        if ($millesimes = request('millesimes')) {
+            $query->whereIn('millesime', $millesimes);
+        }
+
+        // Tri
+        if ($tri = request('tri_nom')) {
+            $query->orderBy('nom', $tri);
+        }
+
+        // Pagination
         $bouteilles = $query->paginate(25)->withQueryString();
 
-        // Retourne la vue avec les données
-        return view('catalogue.index', compact('bouteilles'));
+        // Valeurs uniques pour les filtres, sans null
+        $types = Bouteille::whereNotNull('type')->distinct()->pluck('type');
+        $pays = Bouteille::whereNotNull('pays')->distinct()->pluck('pays');
+        $formats = Bouteille::whereNotNull('format')->distinct()->pluck('format');
+        $millesimes = Bouteille::whereNotNull('millesime')->distinct()->pluck('millesime');
+
+        return view('catalogue.index', compact('bouteilles', 'types', 'pays', 'formats', 'millesimes'));
     }
 }
