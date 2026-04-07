@@ -9,6 +9,7 @@ class Utilisateur extends Authenticatable
 {
     use HasFactory;
 
+     protected $fillable = [
     /**
      * Model `Utilisateur` — représente la table `utilisateurs`.
      * Étend `Authenticatable` pour l'usage avec le système d'authentification Laravel.
@@ -25,6 +26,11 @@ class Utilisateur extends Authenticatable
         'nom',
         'email',
         'mot_de_passe',
+    ];
+
+    /**
+     * Indique quel champ utiliser comme mot de passe.
+     * Par défaut Laravel utilise "password", mais ici on utilise "mot_de_passe".
         'id_role',
     ];
 

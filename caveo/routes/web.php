@@ -7,6 +7,8 @@ use App\Models\Role;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BouteilleController;
+use feature-connexion-utilisateur
+use App\Http\Controllers\AuthController;
 use feature-inscription-utilisateur;
 use App\Http\Requests\InscriptionRequest;
 use Illuminate\Support\Facades\Hash;
@@ -115,6 +117,13 @@ Route::post('/inscription', function (InscriptionRequest $request) {
   // Renvoyer sur la même page et afficher une alerte de succès
   return back()->with('status', 'Compte créé avec succès.');
 })->name('inscription.submit');
+
+/**
+ * Routes pour la connexion.
+ */
+Route::get('/connexion', [AuthController::class, 'create'])->name('connexion');
+Route::post('/connexion', [AuthController::class, 'store'])->name('auth.store');
+Route::get('/deconnexion', [AuthController::class, 'destroy'])->name('deconnexion');
 
 /**
  * Route de test temporaire pour valider la connexion à l'API SAQ

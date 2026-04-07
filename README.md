@@ -2,6 +2,8 @@
 Branche feature inscription utilisateur
 Branche feature catalogue
 
+Branche feature connexion utilisateur
+
 ### Auteurs
 
 Elodie Buczkowski
