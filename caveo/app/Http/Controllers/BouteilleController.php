@@ -34,9 +34,14 @@ class BouteilleController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Bouteille $bouteille)
+    public function show(Bouteille $bouteille, Request $request)
     {
-        //
+        $source = $request->query('source', 'catalogue');
+
+        return view('bouteilles.show', [
+            'bouteille' => $bouteille,
+            'source' => $source
+        ]);
     }
 
     /**
