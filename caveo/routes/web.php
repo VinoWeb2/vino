@@ -7,9 +7,7 @@ use App\Models\Role;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BouteilleController;
-use feature-connexion-utilisateur
 use App\Http\Controllers\AuthController;
-use feature-inscription-utilisateur;
 use App\Http\Requests\InscriptionRequest;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\Registered;
