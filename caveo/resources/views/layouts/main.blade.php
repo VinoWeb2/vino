@@ -22,6 +22,7 @@
         @yield('content')
     </main>
 
+    @if(Auth::check())
     <footer class="bg-[#FCF8F7] text-black fixed bottom-3 left-3 right-3 rounded-xl shadow-2xl ring-1 ring-gray-300 py-2">
         <div class="flex justify-around text-center">
             <a href="#" class="flex flex-col items-center gap-1 px-3 py-1">
@@ -50,6 +51,7 @@
             </a>
         </div>
     </footer>
+    @endif
 </body>
 
 </html>
