@@ -5,6 +5,7 @@ use App\Models\Bouteille;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BouteilleController;
+use App\Http\Controllers\CatalogueController;
 
 /*
 |--------------------------------------------------------------------------
@@ -59,7 +60,12 @@ function trouverAttribut(array $attributes, string $nomRecherche): ?string
  */
 Route::get('/', function () {
   return view('welcome');
-});
+})->name('accueil');
+
+/**
+ * Route vers le catalogue
+ */
+Route::get('/catalogue', [CatalogueController::class, 'index'])->name('catalogue.index');
 
 /**
  * Route de test temporaire pour valider la connexion à l'API SAQ
