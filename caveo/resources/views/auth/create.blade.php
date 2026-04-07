@@ -32,7 +32,7 @@
             </div>
             <div class="my-4 text-center text-sm">
                 <span class="text-gray-500">Pas encore de compte?</span>
-                <a href="#" class="text-[#7A1E2E] underline">Créer un compte</a>
+                <a href="{{ route('inscription.form') }}" class="text-[#7A1E2E] underline">Créer un compte</a>
             </div>
     </div>
 </div>
