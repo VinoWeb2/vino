@@ -44,7 +44,7 @@ class AuthController extends Controller
 
         Auth::login($utilisateur);
 
-        return redirect()->intended('/')->withSuccess('Connexion réussie!');
+        return redirect()->intended('/accueil')->withSuccess('Connexion réussie!');
     }
 
     /**

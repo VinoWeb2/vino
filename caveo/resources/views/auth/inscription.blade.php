@@ -30,7 +30,7 @@
                         <label for="prenom" class="block text-sm font-medium text-[#1A1A1A]">Prénom</label>
                         <input id="prenom" name="prenom" type="text" placeholder="Marie"
                             value="{{ old('prenom') }}"
-                            class="mt-1 block w-full border border-[#E0E0E0] text-[#1A1A1A] rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#A83248] focus:border-[#A83248]" />
+                            class="mt-1 block w-full border-2 text-[#1A1A1A] rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#A83248] focus:border-[#A83248] @error ('prenom') border-red-600 @enderror" />
                         @error('prenom')<p class="text-sm text-red-600 mt-1">{{ $message }}</p>@enderror
                     </div>
 
@@ -38,7 +38,7 @@
                         <label for="nom" class="block text-sm font-medium text-[#1A1A1A]">Nom</label>
                         <input id="nom" name="nom" type="text" placeholder="Tremblay"
                             value="{{ old('nom') }}"
-                            class="mt-1 block w-full border border-[#E0E0E0] text-[#1A1A1A] rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#A83248] focus:border-[#A83248]" />
+                            class="mt-1 block w-full border-2 text-[#1A1A1A] rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#A83248] focus:border-[#A83248] @error ('nom') border-red-600 @enderror" />
                         @error('nom')<p class="text-sm text-red-600 mt-1">{{ $message }}</p>@enderror
                     </div>
                 </div>
@@ -47,7 +47,7 @@
                     <label for="courriel" class="block text-sm font-medium text-[#1A1A1A]">Adresse courriel</label>
                     <input id="courriel" name="courriel" type="text" placeholder="exemple@courriel.com"
                         value="{{ old('courriel') }}"
-                        class="mt-1 block w-full border border-[#E0E0E0] text-[#1A1A1A] rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#A83248] focus:border-[#A83248]" />
+                        class="mt-1 block w-full border-2 text-[#1A1A1A] rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#A83248] focus:border-[#A83248] @error ('courriel') border-red-600 @enderror" />
                     @error('courriel')<p class="text-sm text-red-600 mt-1">{{ $message }}</p>@enderror
                 </div>
 
@@ -58,7 +58,7 @@
                 <div>
                     <label for="mot_de_passe" class="block text-sm font-medium text-[#1A1A1A]">Mot de passe</label>
                     <input id="mot_de_passe" name="mot_de_passe" type="password"
-                        class="mt-1 block w-full border border-[#E0E0E0] text-[#1A1A1A] rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#A83248] focus:border-[#A83248]" />
+                        class="mt-1 block w-full border-2 text-[#1A1A1A] rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#A83248] focus:border-[#A83248] @error ('mot_de_passe') border-red-600 @enderror" />
                     <p class="mt-1 text-sm text-[#666666]">Minimum : 8 caractères</p>
                     @error('mot_de_passe')<p class="text-sm text-red-600 mt-1">{{ $message }}</p>@enderror
                 </div>
@@ -66,7 +66,7 @@
                 <div>
                     <label for="mot_de_passe_confirmation" class="block text-sm font-medium text-[#1A1A1A]">Confirmer le mot de passe</label>
                     <input id="mot_de_passe_confirmation" name="mot_de_passe_confirmation" type="password"
-                        class="mt-1 block w-full border border-[#E0E0E0] text-[#1A1A1A] rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#A83248] focus:border-[#A83248]" />
+                        class="mt-1 block w-full border-2 text-[#1A1A1A] rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#A83248] focus:border-[#A83248] @error ('mot_de_passe_confirmation') border-red-600 @enderror" />
                     @error('mot_de_passe_confirmation')<p class="text-sm text-red-600 mt-1">{{ $message }}</p>@enderror
                 </div>
 
@@ -81,7 +81,7 @@
                 </div>
 
                 <div class="text-center text-sm text-[#666666]">
-                    Déjà un compte ? <a href="{{ url('/connexion') }}" class="text-[#7A1E2E] font-medium hover:underline">Se connecter</a>
+                    Déjà un compte ? <a href="{{ route('connexion') }}" class="text-[#7A1E2E] font-medium hover:underline">Se connecter</a>
                 </div>
             </form>
         </div>

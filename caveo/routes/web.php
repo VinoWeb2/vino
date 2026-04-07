@@ -28,6 +28,34 @@ use App\Http\Controllers\CatalogueController;
 |
 */
 
+
+/**
+ * Routes en étant connecté
+ */
+Route::middleware('auth')->group(function() {
+
+  /**
+ * Route de la page d'accueil.
+ */
+  Route::get('/accueil', function () {
+    return view('welcome');
+  })->name('accueil');
+
+  /**
+ * Route vers le catalogue
+ */
+  Route::get('/catalogue', [CatalogueController::class, 'index'])->name('catalogue.index');
+
+  /**
+ * Route vers la fiche détail
+ */
+  Route::get('/bouteilles/{bouteille}', [BouteilleController::class, 'show'])
+    ->name('bouteilles.show')
+    ->missing(function(){
+      return redirect('/catalogue');
+  });
+});
+
 /**
  * Route permettant à l'administrateur de déclencher
  * la mise à jour de l'inventaire SAQ.
@@ -63,26 +91,7 @@ function trouverAttribut(array $attributes, string $nomRecherche): ?string
   return null;
 }
 
-/**
- * Route de la page d'accueil.
- */
-Route::get('/', function () {
-  return view('welcome');
-})->name('accueil');
 
-/**
- * Route vers le catalogue
- */
-Route::get('/catalogue', [CatalogueController::class, 'index'])->name('catalogue.index');
-
-/**
- * Route vers la fiche détail
- */
-Route::get('/bouteilles/{bouteille}', [BouteilleController::class, 'show'])
-  ->name('bouteilles.show')
-  ->missing(function(){
-    return redirect('/catalogue');
-});
 /*
  * Afficher le formulaire d'inscription (UI seulement) et traiter la soumission.
  * La page utilise le layout `layouts.main` (header/footer inchangés).
@@ -113,14 +122,14 @@ Route::post('/inscription', function (InscriptionRequest $request) {
   Auth::login($utilisateur);
 
   // Renvoyer sur la même page et afficher une alerte de succès
-  return back()->with('status', 'Compte créé avec succès.');
+  return redirect()->intended('/accueil')->with('status', 'Compte créé avec succès.');
 })->name('inscription.submit');
 
 /**
  * Routes pour la connexion.
  */
-Route::get('/connexion', [AuthController::class, 'create'])->name('connexion');
-Route::post('/connexion', [AuthController::class, 'store'])->name('auth.store');
+Route::get('/', [AuthController::class, 'create'])->name('connexion');
+Route::post('/', [AuthController::class, 'store'])->name('auth.store');
 Route::get('/deconnexion', [AuthController::class, 'destroy'])->name('deconnexion');
 
 /**
