@@ -69,7 +69,8 @@ class CellierController extends Controller
     }
 
     /**
-     * Affiche le détail d'un cellier avec son inventaire.
+     * Affiche le détail d'un cellier avec son inventaire
+     * et la liste des bouteilles disponibles à l'ajout.
      *
      * @param \App\Models\Cellier $cellier
      * @return \Illuminate\View\View
@@ -80,7 +81,9 @@ class CellierController extends Controller
 
         $cellier->load('inventaires.bouteille');
 
-        return view('celliers.show', compact('cellier'));
+        $bouteilles = \App\Models\Bouteille::orderBy('nom')->get();
+
+        return view('celliers.show', compact('cellier', 'bouteilles'));
     }
 
     /**
