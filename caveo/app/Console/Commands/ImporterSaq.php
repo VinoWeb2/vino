@@ -54,13 +54,6 @@ class ImporterSaq extends Command
   /**
    * Point d'entrée principal de la commande.
    *
-   * Logique :
-   * - appelle l'API SAQ page par page ;
-   * - arrête l'import lorsqu'il n'y a plus de résultats
-   *   ou lorsqu'une page contient moins d'items que la taille demandée ;
-   * - filtre les produits non pertinents ;
-   * - crée ou met à jour les bouteilles en base de données.
-   *
    * @return int
    */
   public function handle(): int
@@ -101,11 +94,6 @@ class ImporterSaq extends Command
 
         $this->info("Page {$page} terminée. Importés : {$totalImporte} | Ignorés : {$totalIgnores}");
 
-        /*
-                 * Condition d'arrêt fiable :
-                 * si l'API retourne moins d'items que demandé,
-                 * on considère qu'on a atteint la dernière page.
-                 */
         if (count($items) < $pageSize) {
           $this->info('Dernière page atteinte.');
           break;
@@ -113,14 +101,8 @@ class ImporterSaq extends Command
 
         $page++;
 
-        /*
-                 * Petite pause pour limiter la charge sur l'API distante.
-                 */
         sleep(1);
 
-        /*
-                 * Arrêt de sécurité pour éviter une boucle infinie.
-                 */
         if ($page > self::LIMITE_PAGES_SECURITE) {
           $this->warn('Arrêt de sécurité atteint : limite maximale de pages dépassée.');
           break;
@@ -144,8 +126,8 @@ class ImporterSaq extends Command
   /**
    * Envoie une requête GraphQL à l'API SAQ pour une page donnée.
    *
-   * @param int $page Numéro de page à récupérer.
-   * @param int $pageSize Nombre d'items par page.
+   * @param int $page
+   * @param int $pageSize
    * @return \Illuminate\Http\Client\Response
    */
   private function envoyerRequeteSaq(int $page, int $pageSize)
@@ -181,10 +163,6 @@ class ImporterSaq extends Command
         GRAPHQL;
 
     return Http::withOptions([
-      /*
-             * Désactivation de la vérification SSL en environnement local.
-             * À éviter en production.
-             */
       'verify' => false,
     ])->withHeaders([
       'x-api-key' => env('SAQ_API_KEY'),
@@ -202,15 +180,8 @@ class ImporterSaq extends Command
   /**
    * Traite un item retourné par l'API SAQ.
    *
-   * Cette méthode :
-   * - extrait les attributs utiles ;
-   * - valide les informations minimales requises ;
-   * - filtre les produits pour conserver uniquement les vins ;
-   * - prépare les données ;
-   * - exécute l'insertion ou la mise à jour.
-   *
    * @param array $item
-   * @return bool True si l'item a été importé, false s'il a été ignoré.
+   * @return bool
    */
   private function traiterItem(array $item): bool
   {
@@ -230,16 +201,10 @@ class ImporterSaq extends Command
     $image = $item['product']['image']['url'] ?? null;
     $image = $this->normaliserUrlImage($image);
 
-    /*
-         * Validation minimale.
-         */
     if (empty($codeSaq) || empty($nom) || empty($type)) {
       return false;
     }
 
-    /*
-         * Conserver uniquement les vins.
-         */
     if (!$this->estUnVin($type)) {
       return false;
     }
@@ -273,11 +238,8 @@ class ImporterSaq extends Command
   /**
    * Recherche la valeur d'un attribut donné dans la liste des attributs SAQ.
    *
-   * Si la valeur reçue est un tableau, elle est convertie en chaîne
-   * séparée par des virgules.
-   *
-   * @param array $attributes Liste des attributs du produit.
-   * @param string $nomRecherche Nom technique de l'attribut recherché.
+   * @param array $attributes
+   * @param string $nomRecherche
    * @return string|null
    */
   private function trouverAttribut(array $attributes, string $nomRecherche): ?string
@@ -300,10 +262,6 @@ class ImporterSaq extends Command
   /**
    * Nettoie une valeur décimale.
    *
-   * Exemples :
-   * - "13,5%" devient 13.5
-   * - "60.2" devient 60.2
-   *
    * @param string|null $valeur
    * @return float|null
    */
@@ -320,9 +278,6 @@ class ImporterSaq extends Command
 
   /**
    * Nettoie une valeur entière.
-   *
-   * Exemple :
-   * - "750 ml" devient 750
    *
    * @param string|null $valeur
    * @return int|null
@@ -371,10 +326,6 @@ class ImporterSaq extends Command
 
   /**
    * Normalise l'URL d'image retournée par l'API.
-   *
-   * Certaines images sont retournées sous la forme :
-   * //www.saq.com/...
-   * Cette méthode ajoute alors le protocole https:.
    *
    * @param string|null $image
    * @return string|null

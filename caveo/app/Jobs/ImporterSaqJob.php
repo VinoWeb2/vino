@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Jobs;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\Artisan;
