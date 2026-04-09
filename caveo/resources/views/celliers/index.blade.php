@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.main')
 
 @section('title', 'Mes celliers')
 
@@ -26,6 +26,18 @@
     </div>
     @endif
 
+    @if(session('success'))
+    <div class="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-green-700">
+        {{ session('success') }}
+    </div>
+    @endif
+
+    @if(session('error'))
+    <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700">
+        {{ session('error') }}
+    </div>
+    @endif
+
     @if($celliers->isEmpty())
     <div class="bg-white rounded-2xl shadow border border-gray-100 p-5">
         <p class="text-gray-700">Vous n’avez encore aucun cellier.</p>
@@ -34,7 +46,7 @@
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         @foreach($celliers as $cellier)
         <article class="bg-white rounded-2xl shadow border border-gray-100 p-5">
-            <h3 class="text-2xl text-[#7A1E2E] mb-3" style="font-family: 'Crimson Text', serif;">
+            <h3 class="text-2xl text-[#7A1E2E] mb-3 break-words" style="font-family: 'Crimson Text', serif;">
                 {{ $cellier->nom }}
             </h3>
 
@@ -43,13 +55,15 @@
                     <span class="font-medium">Emplacement :</span>
                     {{ $cellier->emplacement ?? 'Non précisé' }}
                 </p>
+
                 <p>
                     <span class="font-medium">Description :</span>
                     {{ $cellier->description ?? 'Aucune description' }}
                 </p>
+
                 <p>
                     <span class="font-medium">Entrées d’inventaire :</span>
-                    {{ $cellier->inventaires_count }}
+                    {{ $cellier->inventaires_count ?? 0 }}
                 </p>
             </div>
 
@@ -67,8 +81,9 @@
                 <form action="{{ route('celliers.destroy', $cellier) }}" method="POST">
                     @csrf
                     @method('DELETE')
+
                     <button type="submit"
-                        onclick="return confirm('Voulez-vous vraiment supprimer ce cellier ?')"
+                        onclick="return confirm('Voulez-vous vraiment supprimer ce cellier ? Cette action est irréversible.')"
                         class="px-3 py-2 rounded-lg border border-red-300 text-red-600 hover:bg-red-50 transition text-sm">
                         Supprimer
                     </button>

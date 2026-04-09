@@ -10,7 +10,7 @@
             value="{{ old('nom', $cellier->nom ?? '') }}"
             maxlength="75"
             required
-            class="w-full rounded-lg border border-gray-300 px-4 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#7A1E2E]">
+            class="w-full rounded-lg border px-4 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#7A1E2E] @error('nom') border-red-500 @else border-gray-300 @enderror">
         @error('nom')
         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
         @enderror
@@ -26,7 +26,7 @@
             id="emplacement"
             value="{{ old('emplacement', $cellier->emplacement ?? '') }}"
             maxlength="55"
-            class="w-full rounded-lg border border-gray-300 px-4 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#7A1E2E]">
+            class="w-full rounded-lg border px-4 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#7A1E2E] @error('emplacement') border-red-500 @else border-gray-300 @enderror">
         @error('emplacement')
         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
         @enderror
@@ -40,7 +40,7 @@
             name="description"
             id="description"
             rows="4"
-            class="w-full rounded-lg border border-gray-300 px-4 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#7A1E2E]">{{ old('description', $cellier->description ?? '') }}</textarea>
+            class="w-full rounded-lg border px-4 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#7A1E2E] @error('description') border-red-500 @else border-gray-300 @enderror">{{ old('description', $cellier->description ?? '') }}</textarea>
         @error('description')
         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
         @enderror

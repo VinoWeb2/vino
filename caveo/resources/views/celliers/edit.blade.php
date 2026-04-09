@@ -1,9 +1,9 @@
-@extends('layouts.app')
+@extends('layouts.main')
 
 @section('title', 'Modifier un cellier')
 
 @section('fleche')
-<a href="{{ route('celliers.show', $cellier) }}" class="text-white text-2xl leading-none">
+<a href="{{ route('celliers.show', $cellier) }}" class="text-white text-2xl leading-none" aria-label="Retour au cellier">
     ←
 </a>
 @endsection
@@ -15,7 +15,18 @@
             Modifier le cellier
         </h2>
 
-        <form action="{{ route('celliers.update', $cellier) }}" method="POST" class="space-y-5">
+        @if ($errors->any())
+        <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700">
+            <p class="font-medium mb-1">Le formulaire contient des erreurs.</p>
+            <ul class="list-disc list-inside text-sm">
+                @foreach ($errors->all() as $erreur)
+                <li>{{ $erreur }}</li>
+                @endforeach
+            </ul>
+        </div>
+        @endif
+
+        <form action="{{ route('celliers.update', $cellier) }}" method="POST" class="space-y-5" novalidate>
             @csrf
             @method('PUT')
 

@@ -1,9 +1,9 @@
-@extends('layouts.app')
+@extends('layouts.main')
 
 @section('title', $cellier->nom)
 
 @section('fleche')
-<a href="{{ route('celliers.index') }}" class="text-white text-2xl leading-none">
+<a href="{{ route('celliers.index') }}" class="text-white text-2xl leading-none" aria-label="Retour aux celliers">
     ←
 </a>
 @endsection
@@ -48,6 +48,17 @@
     </div>
     @endif
 
+    @if ($errors->any())
+    <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700">
+        <p class="font-medium mb-1">Certaines informations sont invalides.</p>
+        <ul class="list-disc list-inside text-sm">
+            @foreach ($errors->all() as $erreur)
+            <li>{{ $erreur }}</li>
+            @endforeach
+        </ul>
+    </div>
+    @endif
+
     <div class="grid gap-5 lg:grid-cols-3">
         <div class="lg:col-span-1">
             <div class="bg-white rounded-2xl shadow border border-gray-100 p-5">
@@ -55,7 +66,7 @@
                     Ajouter une bouteille
                 </h3>
 
-                <form action="{{ route('inventaires.store', $cellier) }}" method="POST" class="space-y-4">
+                <form action="{{ route('inventaires.store', $cellier) }}" method="POST" class="space-y-4" novalidate>
                     @csrf
 
                     <div>
@@ -66,7 +77,7 @@
                             name="id_bouteille"
                             id="id_bouteille"
                             required
-                            class="w-full rounded-lg border border-gray-300 px-4 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#7A1E2E]">
+                            class="w-full rounded-lg border px-4 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#7A1E2E] @error('id_bouteille') border-red-500 @else border-gray-300 @enderror">
                             <option value="">Choisir une bouteille</option>
                             @foreach($bouteilles as $bouteille)
                             <option value="{{ $bouteille->id }}" {{ old('id_bouteille') == $bouteille->id ? 'selected' : '' }}>
@@ -92,7 +103,7 @@
                             id="quantite"
                             value="{{ old('quantite', 1) }}"
                             min="1"
-                            class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#7A1E2E]">
+                            class="w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#7A1E2E] @error('quantite') border-red-500 @else border-gray-300 @enderror">
                         @error('quantite')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -106,7 +117,7 @@
                             name="description"
                             id="description"
                             rows="3"
-                            class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#7A1E2E]">{{ old('description') }}</textarea>
+                            class="w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#7A1E2E] @error('description') border-red-500 @else border-gray-300 @enderror">{{ old('description') }}</textarea>
                         @error('description')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
