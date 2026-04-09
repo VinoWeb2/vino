@@ -2,129 +2,152 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Bouteille;
 use App\Models\Cellier;
-use App\Models\Inventaire;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class InventaireController extends Controller
+/**
+ * Classe CellierController
+ *
+ * Gère toutes les opérations liées aux celliers :
+ * - affichage
+ * - création
+ * - modification
+ * - suppression
+ */
+class CellierController extends Controller
 {
     /**
-     * Ajoute une bouteille à un cellier.
-     * Si la bouteille existe déjà dans ce cellier, sa quantité est augmentée.
+     * Affiche la liste des celliers de l'utilisateur connecté.
+     *
+     * @return \Illuminate\View\View
+     */
+    public function index()
+    {
+        $utilisateur = Auth::user();
+
+        $celliers = Cellier::withCount('inventaires')
+            ->where('id_utilisateur', $utilisateur->id)
+            ->orderBy('nom')
+            ->get();
+
+        return view('celliers.index', compact('celliers'));
+    }
+
+    /**
+     * Affiche le formulaire de création d'un cellier.
+     *
+     * @return \Illuminate\View\View
+     */
+    public function create()
+    {
+        return view('celliers.create');
+    }
+
+    /**
+     * Enregistre un nouveau cellier.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function store(Request $request)
+    {
+        $utilisateur = Auth::user();
+
+        $validated = $request->validate([
+            'nom' => 'required|string|max:75|unique:celliers,nom,NULL,id,id_utilisateur,' . $utilisateur->id,
+            'description' => 'nullable|string|max:2000',
+            'emplacement' => 'nullable|string|max:55',
+        ]);
+
+        Cellier::create([
+            'nom' => $validated['nom'],
+            'id_utilisateur' => $utilisateur->id,
+            'description' => $validated['description'] ?? null,
+            'emplacement' => $validated['emplacement'] ?? null,
+        ]);
+
+        return redirect()
+            ->route('celliers.index')
+            ->with('status', 'Le cellier a été créé avec succès.');
+    }
+
+    /**
+     * Affiche un cellier avec son inventaire.
+     *
+     * @param \App\Models\Cellier $cellier
+     * @return \Illuminate\View\View
+     */
+    public function show(Cellier $cellier)
+    {
+        $this->verifierProprietaire($cellier);
+
+        $cellier->load('inventaires.bouteille');
+
+        $bouteilles = Bouteille::orderBy('nom')->get();
+
+        return view('celliers.show', compact('cellier', 'bouteilles'));
+    }
+
+    /**
+     * Affiche le formulaire de modification.
+     *
+     * @param \App\Models\Cellier $cellier
+     * @return \Illuminate\View\View
+     */
+    public function edit(Cellier $cellier)
+    {
+        $this->verifierProprietaire($cellier);
+
+        return view('celliers.edit', compact('cellier'));
+    }
+
+    /**
+     * Met à jour un cellier existant.
      *
      * @param \Illuminate\Http\Request $request
      * @param \App\Models\Cellier $cellier
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(Request $request, Cellier $cellier)
+    public function update(Request $request, Cellier $cellier)
     {
-        $this->verifierProprietaireCellier($cellier);
+        $this->verifierProprietaire($cellier);
+
+        $utilisateur = Auth::user();
 
         $validated = $request->validate([
-            'id_bouteille' => 'required|integer|exists:bouteilles,id',
-            'quantite' => 'required|integer|min:1|max:999',
-            'description' => 'nullable|string|max:1000',
-        ], [
-            'id_bouteille.required' => 'La bouteille est obligatoire.',
-            'id_bouteille.integer' => 'La bouteille sélectionnée est invalide.',
-            'id_bouteille.exists' => 'La bouteille sélectionnée est invalide.',
-            'quantite.required' => 'La quantité est obligatoire.',
-            'quantite.integer' => 'La quantité doit être un nombre entier.',
-            'quantite.min' => 'La quantité doit être d’au moins 1.',
-            'quantite.max' => 'La quantité ne peut pas dépasser 999.',
-            'description.max' => 'La note ne peut pas dépasser 1000 caractères.',
+            'nom' => 'required|string|max:75|unique:celliers,nom,' . $cellier->id . ',id,id_utilisateur,' . $utilisateur->id,
+            'description' => 'nullable|string|max:2000',
+            'emplacement' => 'nullable|string|max:55',
         ]);
 
-        $inventaire = Inventaire::where('id_cellier', $cellier->id)
-            ->where('id_bouteille', $validated['id_bouteille'])
-            ->first();
-
-        if ($inventaire) {
-            $inventaire->quantite += $validated['quantite'];
-
-            if (array_key_exists('description', $validated) && $validated['description'] !== null) {
-                $inventaire->description = $validated['description'];
-            }
-
-            $inventaire->save();
-
-            return redirect()
-                ->route('celliers.show', $cellier)
-                ->with('status', 'La quantité de la bouteille a été mise à jour.');
-        }
-
-        Inventaire::create([
-            'id_cellier' => $cellier->id,
-            'id_bouteille' => $validated['id_bouteille'],
-            'quantite' => $validated['quantite'],
+        $cellier->update([
+            'nom' => $validated['nom'],
             'description' => $validated['description'] ?? null,
-            'date_ajout' => now(),
+            'emplacement' => $validated['emplacement'] ?? null,
         ]);
 
         return redirect()
             ->route('celliers.show', $cellier)
-            ->with('status', 'La bouteille a été ajoutée au cellier.');
+            ->with('status', 'Le cellier a été modifié avec succès.');
     }
 
     /**
-     * Met à jour une ligne d'inventaire.
-     * Si la quantité est à 0, la ligne est supprimée.
+     * Supprime un cellier.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param \App\Models\Inventaire $inventaire
+     * @param \App\Models\Cellier $cellier
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(Request $request, Inventaire $inventaire)
+    public function destroy(Cellier $cellier)
     {
-        $this->verifierProprietaireInventaire($inventaire);
+        $this->verifierProprietaire($cellier);
 
-        $validated = $request->validate([
-            'quantite' => 'required|integer|min:0|max:999',
-            'description' => 'nullable|string|max:1000',
-        ], [
-            'quantite.required' => 'La quantité est obligatoire.',
-            'quantite.integer' => 'La quantité doit être un nombre entier.',
-            'quantite.min' => 'La quantité ne peut pas être négative.',
-            'quantite.max' => 'La quantité ne peut pas dépasser 999.',
-            'description.max' => 'La note ne peut pas dépasser 1000 caractères.',
-        ]);
-
-        if ((int) $validated['quantite'] === 0) {
-            $cellierId = $inventaire->id_cellier;
-            $inventaire->delete();
-
-            return redirect()
-                ->route('celliers.show', $cellierId)
-                ->with('status', 'La bouteille a été retirée du cellier.');
-        }
-
-        $inventaire->update([
-            'quantite' => $validated['quantite'],
-            'description' => $validated['description'] ?? null,
-        ]);
+        $cellier->delete();
 
         return redirect()
-            ->route('celliers.show', $inventaire->id_cellier)
-            ->with('status', 'L’inventaire a été mis à jour avec succès.');
-    }
-
-    /**
-     * Supprime une ligne d'inventaire.
-     *
-     * @param \App\Models\Inventaire $inventaire
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function destroy(Inventaire $inventaire)
-    {
-        $this->verifierProprietaireInventaire($inventaire);
-
-        $cellierId = $inventaire->id_cellier;
-        $inventaire->delete();
-
-        return redirect()
-            ->route('celliers.show', $cellierId)
-            ->with('status', 'La bouteille a été supprimée du cellier.');
+            ->route('celliers.index')
+            ->with('status', 'Le cellier a été supprimé avec succès.');
     }
 
     /**
@@ -133,7 +156,7 @@ class InventaireController extends Controller
      * @param \App\Models\Cellier $cellier
      * @return void
      */
-    private function verifierProprietaireCellier(Cellier $cellier): void
+    private function verifierProprietaire(Cellier $cellier): void
     {
         $utilisateur = Auth::user();
 
@@ -141,26 +164,6 @@ class InventaireController extends Controller
             $cellier->id_utilisateur !== $utilisateur->id,
             403,
             'Accès non autorisé à ce cellier.'
-        );
-    }
-
-    /**
-     * Vérifie que la ligne d'inventaire appartient à un cellier
-     * de l'utilisateur connecté.
-     *
-     * @param \App\Models\Inventaire $inventaire
-     * @return void
-     */
-    private function verifierProprietaireInventaire(Inventaire $inventaire): void
-    {
-        $utilisateur = Auth::user();
-
-        $inventaire->load('cellier');
-
-        abort_if(
-            !$inventaire->cellier || $inventaire->cellier->id_utilisateur !== $utilisateur->id,
-            403,
-            'Accès non autorisé à cet inventaire.'
         );
     }
 }
