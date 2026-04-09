@@ -8,18 +8,33 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 class Utilisateur extends Authenticatable
 {
     use HasFactory;
-    
-    /**
-     * Model `Utilisateur` — représente la table `utilisateurs`.
-     * Étend `Authenticatable` pour l'usage avec le système d'authentification Laravel.
-     */
 
+    /**
+     * Nom de la table associée au modèle.
+     *
+     * @var string
+     */
     protected $table = 'utilisateurs';
 
+    /**
+     * Clé primaire du modèle.
+     *
+     * @var string
+     */
     protected $primaryKey = 'id';
 
+    /**
+     * Indique si le modèle utilise les colonnes created_at et updated_at.
+     *
+     * @var bool
+     */
     public $timestamps = false;
 
+    /**
+     * Attributs pouvant être assignés en masse.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
         'prenom',
         'nom',
@@ -29,27 +44,44 @@ class Utilisateur extends Authenticatable
     ];
 
     /**
-     * Indique quel champ utiliser comme mot de passe.
-     * Par défaut Laravel utilise "password", mais ici on utilise "mot_de_passe".
+     * Attributs à masquer lors de la sérialisation.
+     *
+     * @var array<int, string>
      */
     protected $hidden = [
         'mot_de_passe',
     ];
 
     /**
-     * Retourne le mot de passe utilisé par le système d'authentification.
+     * Retourne le mot de passe utilisé par le système d'authentification Laravel.
+     *
+     * Cette méthode est nécessaire puisque le champ utilisé dans la table
+     * n'est pas "password", mais "mot_de_passe".
+     *
+     * @return string
      */
-    public function getAuthPassword()
+    public function getAuthPassword(): string
     {
         return $this->mot_de_passe;
     }
 
     /**
-     * Relation vers le rôle de l'utilisateur.
-     * Utilise la clé `id_role` dans la table `utilisateurs`.
+     * Retourne le rôle associé à l'utilisateur.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function role()
     {
         return $this->belongsTo(Role::class, 'id_role');
+    }
+
+    /**
+     * Retourne les celliers appartenant à l'utilisateur.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function celliers()
+    {
+        return $this->hasMany(Cellier::class, 'id_utilisateur');
     }
 }
