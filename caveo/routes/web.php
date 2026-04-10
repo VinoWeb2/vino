@@ -1,11 +1,11 @@
 <?php
 
-use App\Http\Controllers\InventaireSaqController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BouteilleController;
 use App\Http\Controllers\CatalogueController;
 use App\Http\Controllers\CellierController;
 use App\Http\Controllers\InventaireController;
+use App\Http\Controllers\InventaireSaqController;
 use App\Http\Controllers\RegisterController;
 use App\Models\Bouteille;
 use Illuminate\Support\Facades\Http;
@@ -20,7 +20,8 @@ use Illuminate\Support\Facades\Route;
 | Il permet :
 | - d'afficher les pages publiques ;
 | - de gérer les pages accessibles aux utilisateurs connectés ;
-| - de lancer la mise à jour de l'inventaire SAQ côté admin ;
+| - de lancer la mise à jour de l'inventaire SAQ ;
+| - d'effectuer une recherche AJAX de bouteilles pour l'ajout au cellier ;
 | - de tester manuellement la connexion à l'API SAQ via une route temporaire.
 |
 */
@@ -29,6 +30,7 @@ use Illuminate\Support\Facades\Route;
  * Routes accessibles uniquement aux utilisateurs connectés.
  */
 Route::middleware('auth')->group(function () {
+
   /**
    * Route de la page d'accueil.
    *
@@ -70,6 +72,15 @@ Route::middleware('auth')->group(function () {
   Route::resource('celliers', CellierController::class);
 
   /**
+   * Recherche AJAX de bouteilles pour la modale d'ajout au cellier.
+   *
+   * Cette route retourne une liste JSON limitée de bouteilles
+   * correspondant au texte recherché.
+   */
+  Route::get('/celliers/recherche/bouteilles', [CellierController::class, 'rechercherBouteilles'])
+    ->name('celliers.bouteilles.recherche');
+
+  /**
    * Ajoute une bouteille dans un cellier.
    */
   Route::post('/celliers/{cellier}/inventaires', [InventaireController::class, 'store'])
@@ -86,14 +97,13 @@ Route::middleware('auth')->group(function () {
    */
   Route::delete('/inventaires/{inventaire}', [InventaireController::class, 'destroy'])
     ->name('inventaires.destroy');
-});
 
-/**
- * Route permettant à l'administrateur de déclencher
- * la mise à jour de l'inventaire SAQ.
- */
-Route::post('/admin/saq/update', [InventaireSaqController::class, 'mettreAJour'])
-  ->name('admin.saq.update');
+  /**
+   * Déclenche la mise à jour de l'inventaire SAQ.
+   */
+  Route::post('/admin/saq/update', [InventaireSaqController::class, 'mettreAJour'])
+    ->name('admin.saq.update');
+});
 
 /**
  * Recherche un attribut spécifique dans la liste des attributs SAQ.
@@ -108,16 +118,10 @@ function trouverAttribut(array $attributes, string $nomRecherche): ?string
     if (($attribute['name'] ?? '') === $nomRecherche) {
       $valeur = $attribute['value'] ?? null;
 
-      /**
-       * Si la valeur est un tableau, elle est convertie en chaîne de caractères.
-       */
       if (is_array($valeur)) {
         return implode(', ', array_map('strval', $valeur));
       }
 
-      /**
-       * Retourne la valeur sous forme de chaîne de caractères ou null.
-       */
       return $valeur !== null ? (string) $valeur : null;
     }
   }
@@ -146,14 +150,8 @@ Route::get('/deconnexion', [AuthController::class, 'destroy'])->name('deconnexio
  * Route de test temporaire pour valider la connexion à l'API SAQ
  * et l'importation d'un petit échantillon de produits.
  *
- * Cette route :
- * - interroge l'API GraphQL de la SAQ ;
- * - récupère un petit nombre d'items ;
- * - extrait certains attributs utiles ;
- * - crée ou met à jour les bouteilles en base de données.
- *
  * Remarque :
- * Cette route est utile en développement, mais elle devrait idéalement
+ * Cette route est utile en développement, mais devrait idéalement
  * être retirée ou protégée dans la version finale.
  */
 Route::get('/test-saq', function () {

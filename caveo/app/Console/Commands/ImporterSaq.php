@@ -12,7 +12,7 @@ use Throwable;
  *
  * Cette commande :
  * - récupère les produits SAQ par pagination ;
- * - filtre pour conserver uniquement les vins ;
+ * - filtre pour conserver les vins ;
  * - nettoie certaines valeurs avant insertion ;
  * - met à jour les bouteilles existantes ou en crée de nouvelles ;
  * - évite les doublons grâce à updateOrCreate().
@@ -34,14 +34,14 @@ class ImporterSaq extends Command
    *
    * @var string
    */
-  protected $description = 'Importer toutes les bouteilles de vin depuis la SAQ';
+  protected $description = 'Importer les bouteilles de vin depuis la SAQ';
 
   /**
    * Taille de page utilisée pour les requêtes paginées.
    *
    * @var int
    */
-  private const TAILLE_PAGE = 50;
+  private const TAILLE_PAGE = 100;
 
   /**
    * Limite de sécurité pour éviter une boucle infinie
@@ -93,11 +93,6 @@ class ImporterSaq extends Command
         }
 
         $this->info("Page {$page} terminée. Importés : {$totalImporte} | Ignorés : {$totalIgnores}");
-
-        if (count($items) < $pageSize) {
-          $this->info('Dernière page atteinte.');
-          break;
-        }
 
         $page++;
 
@@ -201,11 +196,18 @@ class ImporterSaq extends Command
     $image = $item['product']['image']['url'] ?? null;
     $image = $this->normaliserUrlImage($image);
 
-    if (empty($codeSaq) || empty($nom) || empty($type)) {
+    if (empty($codeSaq) || empty($nom)) {
+      $this->warn('Produit ignoré : code SAQ ou nom manquant.');
+      return false;
+    }
+
+    if (empty($type)) {
+      $this->warn("Produit ignoré : type manquant pour {$nom} ({$codeSaq}).");
       return false;
     }
 
     if (!$this->estUnVin($type)) {
+      $this->line("Produit ignoré (type non retenu) : {$nom} | type = {$type}");
       return false;
     }
 
@@ -296,6 +298,9 @@ class ImporterSaq extends Command
   /**
    * Vérifie si le type de produit correspond à un vin.
    *
+   * Cette version est plus permissive afin d'éviter
+   * d'exclure des vins valides à cause de libellés différents.
+   *
    * @param string $type
    * @return bool
    */
@@ -303,25 +308,9 @@ class ImporterSaq extends Command
   {
     $type = mb_strtolower(trim($type));
 
-    $typesAcceptes = [
-      'vin rouge',
-      'vin blanc',
-      'vin rosé',
-      'vin mousseux',
-      'vin orange',
-      'vin',
-      'porto',
-      'vin fortifié',
-      'champagne',
-    ];
-
-    foreach ($typesAcceptes as $typeAccepte) {
-      if (str_contains($type, $typeAccepte)) {
-        return true;
-      }
-    }
-
-    return false;
+    return str_contains($type, 'vin')
+      || str_contains($type, 'porto')
+      || str_contains($type, 'champagne');
   }
 
   /**

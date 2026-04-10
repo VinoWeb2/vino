@@ -11,10 +11,11 @@ use Illuminate\Support\Facades\Auth;
  * Classe CellierController
  *
  * Gère toutes les opérations liées aux celliers :
- * - affichage
+ * - affichage de la liste
  * - création
  * - modification
  * - suppression
+ * - recherche AJAX de bouteilles pour l'ajout au cellier
  */
 class CellierController extends Controller
 {
@@ -85,13 +86,11 @@ class CellierController extends Controller
 
         $cellier->load('inventaires.bouteille');
 
-        $bouteilles = Bouteille::orderBy('nom')->get();
-
-        return view('celliers.show', compact('cellier', 'bouteilles'));
+        return view('celliers.show', compact('cellier'));
     }
 
     /**
-     * Affiche le formulaire de modification.
+     * Affiche le formulaire de modification d'un cellier.
      *
      * @param \App\Models\Cellier $cellier
      * @return \Illuminate\View\View
@@ -148,6 +147,38 @@ class CellierController extends Controller
         return redirect()
             ->route('celliers.index')
             ->with('status', 'Le cellier a été supprimé avec succès.');
+    }
+
+    /**
+     * Recherche des bouteilles pour l'ajout au cellier.
+     *
+     * Cette méthode est utilisée par la modale de recherche.
+     * Elle retourne une liste JSON limitée de bouteilles
+     * correspondant au texte recherché.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function rechercherBouteilles(Request $request)
+    {
+        $recherche = trim((string) $request->query('q', ''));
+
+        if ($recherche === '' || mb_strlen($recherche) < 2) {
+            return response()->json([]);
+        }
+
+        $bouteilles = Bouteille::query()
+            ->select('id', 'nom', 'pays', 'format', 'type', 'prix', 'image')
+            ->where(function ($query) use ($recherche) {
+                $query->where('nom', 'like', '%' . $recherche . '%')
+                    ->orWhere('pays', 'like', '%' . $recherche . '%')
+                    ->orWhere('type', 'like', '%' . $recherche . '%');
+            })
+            ->orderBy('nom')
+            ->limit(10)
+            ->get();
+
+        return response()->json($bouteilles);
     }
 
     /**

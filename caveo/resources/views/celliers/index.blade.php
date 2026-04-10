@@ -4,8 +4,6 @@
 
 @section('content')
 
-<script type="module" src="{{ asset('js/message-flash.js') }}"></script>
-
 <div class="m-4 flex items-start justify-between gap-4">
     <div>
         <h1 class="text-3xl text-[#7A1E2E]" style="font-family: 'Crimson Text', serif;">
@@ -34,7 +32,7 @@
 @foreach($celliers as $cellier)
 <div class="flex gap-6 m-4 mb-6 font-roboto border p-4 rounded bg-white">
     {{-- Image cellier --}}
-    <div class="w-[90px] flex justify-center">
+    <div class="w-[90px] flex justify-center shrink-0">
         <img
             src="{{ asset('images/bouteille-vide.png') }}"
             alt="Illustration du cellier"
@@ -49,38 +47,53 @@
             </h2>
 
             <div class="flex items-center text-sm text-gray-600 space-x-2 flex-wrap">
-                <p>{{ $cellier->emplacement ?? 'Non précisé' }}</p>
+                @if(!empty($cellier->emplacement))
+                <p>{{ $cellier->emplacement }}</p>
+                @endif
+
+                @if(!empty($cellier->emplacement))
                 <span>|</span>
+                @endif
+
                 <p>{{ $cellier->inventaires_count ?? 0 }} bouteille(s)</p>
             </div>
 
+            @if(!empty($cellier->description))
             <p class="mt-2 font-medium mb-3 text-sm text-gray-700">
-                {{ $cellier->description ?? 'Aucune description' }}
+                {{ $cellier->description }}
             </p>
+            @endif
         </div>
 
-        <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+        {{-- Actions --}}
+        <div class="mt-3 flex flex-wrap gap-y-2">
+            {{-- Bouton principal --}}
             <a href="{{ route('celliers.show', $cellier) }}"
-                class="px-4 py-2 bg-[#A83248] text-white rounded w-max">
+                class="px-4 py-2 bg-[#A83248] text-white rounded text-sm">
                 Voir le cellier
             </a>
 
-            <a href="{{ route('celliers.edit', $cellier) }}"
-                class="px-4 py-2 border rounded w-max">
-                Modifier
-            </a>
+            {{-- Actions secondaires alignées --}}
+            <div class="w-full flex items-center gap-4">
+                <a href="{{ route('celliers.edit', $cellier) }}"
+                    class="text-xs leading-none text-gray-500 hover:text-gray-700">
+                    Modifier
+                </a>
 
-            <form method="POST" action="{{ route('celliers.destroy', $cellier) }}">
-                @csrf
-                @method('DELETE')
+                <form method="POST"
+                    action="{{ route('celliers.destroy', $cellier) }}"
+                    class="m-0 p-0 inline-flex">
+                    @csrf
+                    @method('DELETE')
 
-                <button
-                    type="submit"
-                    onclick="return confirm('Voulez-vous vraiment supprimer ce cellier ? Cette action est irréversible.')"
-                    class="px-4 py-2 border border-red-300 text-red-600 rounded w-max">
-                    Supprimer
-                </button>
-            </form>
+                    <button
+                        type="submit"
+                        onclick="return confirm('Voulez-vous vraiment supprimer ce cellier ? Cette action est irréversible.')"
+                        class="text-xs leading-none text-red-500 hover:text-red-700">
+                        Supprimer
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
