@@ -8,13 +8,14 @@
     <!-- <link rel="stylesheet" href="{{ asset('css/app.css') }}"> -->
     <link rel="icon" href="{{ asset('favicon.ico') }}">
     <link href="https://fonts.googleapis.com/css2?family=Crimson+Text&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap"
+        rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body class="flex flex-col min-h-screen">
     <header class="bg-[#7A1E2E] relative py-4">
-        <div class="absolute left-4 top-1/2 -translate-y-1/2">
+        <div class="absolute right-4 top-1/2 -translate-y-1/2">
             @yield('fleche')
         </div>
         <h1 class="text-center text-white text-3xl" style="font-family: 'Crimson Text', serif;">
@@ -27,32 +28,27 @@
     </main>
 
     @if(Auth::check())
-    <footer class="bg-[#FCF8F7] text-black fixed bottom-3 left-3 right-3 rounded-xl shadow-2xl ring-1 ring-gray-300 py-2">
-        <div class="flex justify-around text-center">
-            <a href="{{ route('accueil') }}" class="flex flex-col items-center gap-1 px-3 py-1">
-                <img
-                    src="{{ request()->routeIs('accueil') 
-                            ? asset('images/icons/home-actif.svg') 
-                            : asset('images/icons/home-inactif.svg') }}"
-                    alt="Explorer"
-                    class="w-6 h-6 object-contain">
-                <p class="text-sm font-roboto font-medium">Accueil</p>
-            </a>
+        <footer
+            class="bg-[#FCF8F7] text-black fixed bottom-3 left-3 right-3 rounded-xl shadow-2xl ring-1 ring-gray-300 py-2">
+            <div class="flex justify-around text-center">
+                <a href="{{ route('accueil') }}" class="flex flex-col items-center gap-1 px-3 py-1 invisible">
+                    <img src="{{ request()->routeIs('accueil')
+            ? asset('images/icons/home-actif.svg')
+            : asset('images/icons/home-inactif.svg') }}" alt="Explorer" class="w-6 h-6 object-contain">
+                    <p class="text-sm font-roboto font-medium">Accueil</p>
+                </a>
 
-            <a href="{{ route('celliers.index') }}" class="flex flex-col items-center gap-1 px-3 py-1">
-                <img
-                    src="{{ request()->routeIs('celliers.*') 
-                ? asset('images/icons/bouteille-actif.svg') 
-                : asset('images/icons/bouteille-inactif.svg') }}"
-                    alt="Cellier"
-                    class="w-6 h-6">
-                <p class="text-sm font-roboto font-medium">Cellier</p>
-            </a>
+                <a href="{{ route('celliers.index') }}" class="flex flex-col items-center gap-1 px-3 py-1">
+                    <img src="{{ request()->routeIs('celliers.*')
+            ? asset('images/icons/bouteille-actif.svg')
+            : asset('images/icons/bouteille-inactif.svg') }}" alt="Cellier" class="w-6 h-6">
+                    <p class="text-sm font-roboto font-medium">Cellier</p>
+                </a>
 
-            <a href="#" class="flex flex-col items-center gap-1 px-3 py-1">
-                <img src="{{ asset('images/icons/ajouter-inactif.svg') }}" alt="Ajouter" class="w-6 h-6">
-                <p class="text-sm font-roboto font-medium">Ajouter</p>
-            </a>
+                <a href="#" class="flex flex-col items-center gap-1 px-3 py-1 invisible">
+                    <img src="{{ asset('images/icons/ajouter-inactif.svg') }}" alt="Ajouter" class="w-6 h-6">
+                    <p class="text-sm font-roboto font-medium">Ajouter</p>
+                </a>
 
             <a href="{{ route('catalogue.index') }}" class="flex flex-col items-center gap-1 px-3 py-1">
                 <img
@@ -61,26 +57,26 @@
                             : asset('images/icons/loop-inactif.svg') }}"
                     alt="Explorer"
                     class="w-6 h-6 object-contain">
-                <p class="text-sm font-roboto font-medium">Explorer</p>
+                <p class="text-sm font-roboto font-medium">Bouteilles</p>
             </a>
 
-            <a href="#" class="flex flex-col items-center gap-1 px-3 py-1">
-                <img src="{{ asset('images/icons/profil-inactif.svg') }}" alt="Profil" class="w-6 h-6">
-                <p class="text-sm font-roboto font-medium">Profil</p>
-            </a>
-        </div>
-    </footer>
+                <a href="#" class="flex flex-col items-center gap-1 px-3 py-1 invisible">
+                    <img src="{{ asset('images/icons/profil-inactif.svg') }}" alt="Profil" class="w-6 h-6">
+                    <p class="text-sm font-roboto font-medium">Profil</p>
+                </a>
+            </div>
+        </footer>
     @endif
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const messages = document.querySelectorAll('.message-flash-auto');
 
-            messages.forEach(function(message) {
-                setTimeout(function() {
+            messages.forEach(function (message) {
+                setTimeout(function () {
                     message.classList.add('opacity-0', 'transition-opacity', 'duration-500');
 
-                    setTimeout(function() {
+                    setTimeout(function () {
                         message.remove();
                     }, 500);
                 }, 3000); // ⬅️ 3 secondes

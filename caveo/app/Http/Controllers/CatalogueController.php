@@ -8,10 +8,8 @@ use Illuminate\Http\Request;
 
 class CatalogueController extends Controller
 {
-     /**
-     * Display a listing of the resource.
-     */
-    public function index(){
+    public function index()
+    {
         $query = Bouteille::query();
 
         // Recherche texte
@@ -29,14 +27,20 @@ class CatalogueController extends Controller
             $query->whereIn('pays', $pays);
         }
 
-        // Filtre par formats (OU)
+        // Filtre par formats (CHOIX UNIQUE)
         if ($formats = request('formats')) {
-            $query->whereIn('format', $formats);
+            // Si un format est sélectionné (une seule valeur)
+            if (!empty($formats)) {
+                $query->where('format', $formats);
+            }
         }
 
-        // Filtre par millésimes (OU)
+        // Filtre par millésimes (CHOIX UNIQUE)
         if ($millesimes = request('millesimes')) {
-            $query->whereIn('millesime', $millesimes);
+            // Si un millésime est sélectionné (une seule valeur)
+            if (!empty($millesimes)) {
+                $query->where('millesime', $millesimes);
+            }
         }
 
         // Tri
@@ -47,22 +51,65 @@ class CatalogueController extends Controller
         // Pagination
         $bouteilles = $query->paginate(25)->withQueryString();
 
-        // Valeurs uniques pour les filtres, sans null et triées
+        // TYPES
+        $selectedTypes = request('types', []);
+        $types = Bouteille::whereNotNull('type')
+            ->distinct()
+            ->pluck('type')
+            ->sortBy(function ($type) use ($selectedTypes) {
+                return [
+                    !in_array($type, $selectedTypes),
+                    $type
+                ];
+            })
+            ->values();
 
-        // Type : ordre alphabétique
-        $types = Bouteille::whereNotNull('type')->distinct()->orderBy('type')->pluck('type');
+        // PAYS
+        $selectedPays = request('pays', []);
+        $pays = Bouteille::whereNotNull('pays')
+            ->distinct()
+            ->pluck('pays')
+            ->sortBy(function ($p) use ($selectedPays) {
+                return [
+                    !in_array($p, $selectedPays),
+                    $p
+                ];
+            })
+            ->values();
 
-        // Pays : ordre alphabétique
-        $pays = Bouteille::whereNotNull('pays')->distinct()->orderBy('pays')->pluck('pays');
+        // FORMATS (choix unique)
+        $selectedFormats = request('formats', null);
+        $formats = Bouteille::whereNotNull('format')
+            ->distinct()
+            ->orderByRaw('CAST(format AS UNSIGNED) ASC')
+            ->pluck('format')
+            ->sortBy(function ($f) use ($selectedFormats) {
+                return [
+                    $f != $selectedFormats,
+                    (int) $f
+                ];
+            })
+            ->values();
 
-        // Formats / quantités : tri croissant numérique
-        // Utilisation de orderByRaw avec CAST(... AS UNSIGNED) pour que les valeurs stockées en texte (ex : "600", "700", "1000") 
-        // soient triées correctement comme des nombres et non comme des chaînes
-        $formats = Bouteille::whereNotNull('format')->distinct()->orderByRaw('CAST(format AS UNSIGNED) ASC')->pluck('format');
+        // MILLÉSIMES (choix unique)
+        $selectedMillesimes = request('millesimes', null);
+        $millesimes = Bouteille::whereNotNull('millesime')
+            ->distinct()
+            ->pluck('millesime')
+            ->sortBy(function ($m) use ($selectedMillesimes) {
+                return [
+                    $m != $selectedMillesimes,
+                    $m
+                ];
+            })
+            ->values();
 
-        // Millésime : ordre croissant numérique
-        $millesimes = Bouteille::whereNotNull('millesime')->distinct()->orderBy('millesime')->pluck('millesime');
-
-        return view('catalogue.index', compact('bouteilles', 'types', 'pays', 'formats', 'millesimes'));
+        return view('catalogue.index', compact(
+            'bouteilles',
+            'types',
+            'pays',
+            'formats',
+            'millesimes'
+        ));
     }
 }

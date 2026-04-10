@@ -63,12 +63,76 @@
                     {{ $bouteille->millesime ?? 'Non spécifié' }}
                 </span>
             </div>
+            <!-- Détails principaux-->
+            @if ($bouteille->type)
+            <p class="mb-1 text-left text-base font-normal text-[#1A1A1A]" style="font-family: 'Roboto', sans-serif;">
+                {{ $bouteille->type }}
+            </p>
+            @endif
+            @if ($bouteille->pays)
+            <p class="mb-1 text-left text-base font-normal text-[#1A1A1A]" style="font-family: 'Roboto', sans-serif;">
+                {{ $bouteille->pays }}
+            </p>
+            @endif
+            <!-- Prix -->
+            <p class="mb-5 text-left text-base font-medium text-[#1A1A1A]" style="font-family: 'Roboto', sans-serif;">
+                @if ($bouteille->prix !== null)
+                {{ number_format($bouteille->prix, 2, ',', ' ') }}$
+                @endif
+            </p>
+            <!-- Détails secondaires -->
+            <div class="mt-3 pt-3 border-t border-[#E0E0E0] text-left text-[#1A1A1A]"
+                style="font-family: 'Roboto', sans-serif;">
+                <!-- Millésime -->
+                @if ($bouteille->millesime)
+                <div class="flex gap-2 mb-1 text-base">
+                    <span class="font-medium">Millésime :</span>
+                    <span class="flex-1 font-normal">
+                        {{ $bouteille->millesime}}
+                    </span>
+                </div>
+                @endif
 
-            <div class="flex gap-2 mb-2 text-lg">
-                <span class="font-medium">Taux d'alcool :</span>
-                <span class="flex-1">
-                    {{ $bouteille->taux_alcool ? $bouteille->taux_alcool . '%' : 'Non spécifié' }}
-                </span>
+                <!-- Taux d'alcool -->
+                @if ($bouteille->taux_alcool)
+                <div class="flex gap-2 mb-1 text-base">
+                    <span class="font-medium">Taux d'alcool :</span>
+                    <span class="flex-1 font-normal">
+                        {{ $bouteille->taux_alcool ? $bouteille->taux_alcool . '%' : 'Non spécifié' }}
+                    </span>
+                </div>
+                @endif
+
+
+
+                @if ($bouteille->cepage || $bouteille->format)
+                <div class="flex justify-between item-start mb-1 text-base">
+                    <!-- Cépage(s) à gauche -->
+                    @if ($bouteille->cepage)
+                    <div class="flex gap-2 text-base">
+                        <span class="font-medium">Cépage(s) :</span>
+                        <span class="flex-1 font-normal">
+                            {{ $bouteille->cepage }}
+                        </span>
+                    </div>
+                    @endif
+                    <!-- Format à droite -->
+                    @if ($bouteille->format)
+                    <span class="text-sm font-normal">
+                        {{ $bouteille->format }} ml
+                    </span>
+                    @endif
+                </div>
+                @endif
+
+
+                <!-- Description à afficher seulement s'il y en a une -->
+                @if (!empty($bouteille->description))
+                <div class="flex gap-2 mb-1 text-base">
+                    <span class="font-medium">Description :</span>
+                    <span class="flex-1 font-normal wrap-break-word">{{ $bouteille->description }}</span>
+                </div>
+                @endif
             </div>
 
             <div class="flex gap-2 text-lg">
