@@ -3,190 +3,253 @@
 @section('title', $cellier->nom)
 
 @section('fleche')
-    <!-- Flèche de retour qui revient à la page précédente (Cellier ou Catalogue) -->
-    <a href="{{ url()->previous() }}">
-        <img src="{{ asset('images/fleches/gauche-blanc.svg') }}" alt="Flèche de retour" class="w-10 h-10">
-    </a>
+<a href="{{ route('celliers.index') }}" class="text-white text-2xl leading-none" aria-label="Retour">
+    ←
+</a>
 @endsection
 
 @section('content')
+<section class="px-4 py-5 pb-48 max-w-5xl mx-auto font-roboto">
 
-<section class="px-4 py-5 pb-24 max-w-5xl mx-auto font-roboto">
-
-    {{-- HEADER --}}
+    {{-- Header --}}
     <div class="mb-6">
         <h1 class="text-3xl text-[#7A1E2E]" style="font-family: 'Crimson Text', serif;">
             {{ $cellier->nom }}
         </h1>
 
         <div class="mt-3 text-sm text-gray-700 space-y-1">
-            <p><span class="font-medium">Emplacement :</span> {{ $cellier->emplacement ?? 'Non précisé' }}</p>
-            <p><span class="font-medium">Description :</span> {{ $cellier->description ?? 'Aucune description' }}</p>
+            @if($cellier->emplacement)
+            <p><strong>Emplacement :</strong> {{ $cellier->emplacement }}</p>
+            @endif
+
+            @if($cellier->description)
+            <p><strong>Description :</strong> {{ $cellier->description }}</p>
+            @endif
         </div>
 
-        <div class="mt-4 flex flex-col gap-2 sm:flex-row">
-            <a href="{{ route('celliers.edit', $cellier) }}" class="px-4 py-2 border rounded text-center">
+        <div class="mt-4 flex items-center gap-3">
+            <a href="{{ route('celliers.index') }}"
+                class="px-4 py-2 bg-[#A83248] text-white rounded text-sm">
+                Voir les celliers
+            </a>
+
+            <a href="{{ route('celliers.edit', $cellier) }}"
+                class="text-xs text-gray-500 hover:text-gray-700">
                 Modifier
             </a>
 
-            <a href="{{ route('celliers.index') }}" class="px-4 py-2 border rounded text-center">
-                Retour
-            </a>
+            <form method="POST" action="{{ route('celliers.destroy', $cellier) }}">
+                @csrf
+                @method('DELETE')
+                <button class="text-xs text-red-500 hover:text-red-700"
+                    onclick="return confirm('Supprimer ce cellier ?')">
+                    Supprimer
+                </button>
+            </form>
         </div>
     </div>
 
     <x-alerts />
 
-    {{-- AJOUT --}}
+    {{-- Ajouter bouteille --}}
     <div class="mb-6 border p-4 rounded bg-white">
         <h2 class="font-semibold text-lg mb-4">Ajouter une bouteille</h2>
 
-        <form action="{{ route('inventaires.store', $cellier) }}" method="POST" class="flex flex-col gap-3">
-            @csrf
-
-            <select name="id_bouteille" required class="border rounded px-3 py-2 w-full @error('id_bouteille') border-red-500 @enderror">
-                <option value="">Choisir une bouteille</option>
-                @foreach($bouteilles as $bouteille)
-                <option value="{{ $bouteille->id }}" {{ old('id_bouteille') == $bouteille->id ? 'selected' : '' }}>
-                    {{ $bouteille->nom }}
-                </option>
-                @endforeach
-            </select>
-
-            @error('id_bouteille')
-            <p class="text-red-500 text-sm">{{ $message }}</p>
-            @enderror
-
-            <input type="number"
-                name="quantite"
-                value="{{ old('quantite', 1) }}"
-                min="1"
-                class="border rounded px-3 py-2 w-full @error('quantite') border-red-500 @enderror">
-
-            @error('quantite')
-            <p class="text-red-500 text-sm">{{ $message }}</p>
-            @enderror
-
-            <button class="bg-[#A83248] text-white px-4 py-3 rounded font-medium">
-                Ajouter
-            </button>
-        </form>
+        <button id="openBottleModal"
+            class="bg-[#A83248] text-white px-4 py-3 rounded w-full">
+            Rechercher une bouteille
+        </button>
     </div>
 
-    {{-- INVENTAIRE --}}
+    {{-- Inventaire --}}
     <div class="space-y-4 pb-20">
-
         @forelse($cellier->inventaires as $inventaire)
-        <div class="flex gap-6 border p-4 rounded bg-white">
+        <div class="flex flex-col sm:flex-row gap-4 border p-4 rounded bg-white">
 
-            {{-- IMAGE --}}
-            <div class="w-[90px] flex justify-center">
+            <div class="w-full sm:w-[90px] flex justify-center">
                 <img
                     src="{{ $inventaire->bouteille->image ?? asset('images/bouteille-vide.png') }}"
-                    alt="{{ $inventaire->bouteille->nom ?? 'Bouteille' }}"
-                    class="w-auto h-[135px]">
+                    class="h-[130px]">
             </div>
 
-            {{-- CONTENU --}}
-            <div class="flex flex-col justify-between flex-1 min-w-0">
+            <div class="flex-1">
+                <h2 class="font-semibold">
+                    {{ $inventaire->bouteille->nom ?? 'N/A' }}
+                </h2>
 
-                <div>
-                    <div class="flex justify-between items-start">
-                        <h2 class="font-semibold text-lg break-words">
-                            {{ $inventaire->bouteille->nom ?? 'Bouteille introuvable' }}
-                        </h2>
+                <p class="text-sm text-gray-600">
+                    {{ $inventaire->bouteille->pays ?? '' }}
+                    {{ $inventaire->bouteille->format ?? '' }}
+                    {{ $inventaire->bouteille->type ?? '' }}
+                </p>
 
-                        @if($inventaire->quantite == 0)
-                        <span class="bg-red-100 text-red-600 text-xs px-2 py-1 rounded-full">
-                            Rupture
-                        </span>
-                        @endif
-                    </div>
+                <p class="mt-2">
+                    Quantité :
+                    <span class="{{ $inventaire->quantite == 0 ? 'text-red-600 font-bold' : '' }}">
+                        {{ $inventaire->quantite }}
+                    </span>
+                </p>
 
-                    <div class="flex items-center text-sm text-gray-600 space-x-2 flex-wrap">
-                        <p>{{ $inventaire->bouteille->pays ?? '' }}</p>
-                        <span>|</span>
-                        <p>{{ $inventaire->bouteille->format ?? '' }} ml</p>
-                        <span>|</span>
-                        <p>{{ $inventaire->bouteille->type ?? '' }}</p>
-                    </div>
+                <div class="flex gap-3 mt-3">
+                    <a href="{{ route('bouteilles.show', $inventaire->bouteille->id) }}"
+                        class="px-3 py-1 bg-[#A83248] text-white text-sm rounded">
+                        Détail
+                    </a>
 
-                    @if($inventaire->bouteille->prix)
-                    <p class="mt-2 font-medium mb-2">
-                        {{ $inventaire->bouteille->prix }} $
-                    </p>
-                    @endif
-
-                    <p class="text-sm mb-2">
-                        Quantité :
-                        <span class="{{ $inventaire->quantite == 0 ? 'text-red-600 font-bold' : '' }}">
-                            {{ $inventaire->quantite }}
-                        </span>
-                    </p>
-
-                    @if($inventaire->quantite == 0)
-                    <p class="text-xs text-red-500 mb-3">
-                        Cette bouteille est conservée dans le cellier, mais n’est plus en stock.
-                    </p>
-                    @endif
-                </div>
-
-                {{-- ACTIONS --}}
-                <div class="flex flex-col gap-3">
-
-                    {{-- UPDATE --}}
-                    <form method="POST" action="{{ route('inventaires.update', $inventaire) }}" class="flex gap-2">
+                    <form method="POST" action="{{ route('inventaires.destroy', $inventaire) }}">
                         @csrf
-                        @method('PUT')
-
-                        <input type="number"
-                            name="quantite"
-                            value="{{ $inventaire->quantite }}"
-                            min="0"
-                            class="border rounded px-3 py-2 w-full">
-
-                        <button class="px-4 py-2 bg-[#A83248] text-white rounded">
-                            OK
-                        </button>
+                        @method('DELETE')
+                        <button class="text-xs text-red-500">Supprimer</button>
                     </form>
-
-                    <p class="text-xs text-gray-500">
-                        Mets 0 pour indiquer qu’il n’y a plus de stock.
-                    </p>
-
-                    <div class="flex flex-col gap-2 sm:flex-row">
-
-                        @if($inventaire->bouteille)
-                        <a href="{{ route('bouteilles.show', $inventaire->bouteille->id) }}?source=cellier"
-                            class="px-4 py-2 bg-[#A83248] text-white rounded w-max">
-                            Détail
-                        </a>
-                        @endif
-
-                        <form method="POST" action="{{ route('inventaires.destroy', $inventaire) }}">
-                            @csrf
-                            @method('DELETE')
-
-                            <button onclick="return confirm('Supprimer cette bouteille ?')"
-                                class="px-4 py-2 border border-red-300 text-red-600 rounded w-max">
-                                Supprimer
-                            </button>
-                        </form>
-
-                    </div>
                 </div>
-
             </div>
         </div>
-
         @empty
-        <div class="border p-4 rounded bg-white">
-            <p>Aucune bouteille dans ce cellier</p>
-        </div>
+        <p>Aucune bouteille.</p>
         @endforelse
-
     </div>
 
 </section>
+
+{{-- DATA --}}
+<div id="bottleModalData"
+    data-fallback-image="{{ asset('images/bouteille-vide.png') }}"
+    data-csrf-token="{{ csrf_token() }}"
+    data-store-url="{{ route('inventaires.store', $cellier) }}">
+</div>
+
+{{-- Overlay --}}
+<div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40"></div>
+
+{{-- Modal centrée --}}
+<div id="modal" class="fixed inset-0 hidden z-50 flex items-center justify-center px-4">
+
+    <div class="bg-white w-full max-w-lg rounded-lg shadow-lg flex flex-col max-h-[90vh]">
+
+        {{-- Header --}}
+        <div class="p-4 border-b flex justify-between items-center">
+            <h2 class="font-semibold text-lg">Ajouter une bouteille</h2>
+            <button id="closeModal" class="text-xl">✕</button>
+        </div>
+
+        {{-- Search --}}
+        <div class="p-4 border-b">
+            <input id="search"
+                type="text"
+                placeholder="Rechercher une bouteille..."
+                class="w-full border p-2 rounded">
+        </div>
+
+        {{-- Results --}}
+        <div id="results" class="p-4 overflow-y-auto flex-1 space-y-4">
+            <p class="text-center text-gray-500">Tape au moins 2 caractères pour rechercher</p>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const modal = document.getElementById('modal');
+        const overlay = document.getElementById('overlay');
+        const openBtn = document.getElementById('openBottleModal');
+        const closeBtn = document.getElementById('closeModal');
+        const search = document.getElementById('search');
+        const results = document.getElementById('results');
+
+        const data = document.getElementById('bottleModalData');
+
+        const fallbackImage = data.dataset.fallbackImage;
+        const csrf = data.dataset.csrfToken;
+        const storeUrl = data.dataset.storeUrl;
+
+        let timer;
+
+        openBtn.onclick = () => {
+            overlay.classList.remove('hidden');
+            modal.classList.remove('hidden');
+            search.focus();
+        };
+
+        closeBtn.onclick = close;
+        overlay.onclick = close;
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') close();
+        });
+
+        function close() {
+            overlay.classList.add('hidden');
+            modal.classList.add('hidden');
+        }
+
+        search.addEventListener('input', () => {
+            clearTimeout(timer);
+            timer = setTimeout(() => fetchResults(search.value), 300);
+        });
+
+        async function fetchResults(q) {
+
+            if (q.length < 2) {
+                results.innerHTML = '<p class="text-center text-gray-500">Minimum 2 caractères</p>';
+                return;
+            }
+
+            results.innerHTML = '<p class="text-center text-gray-500">Chargement...</p>';
+
+            try {
+                const res = await fetch(`{{ route('celliers.bouteilles.recherche') }}?q=${encodeURIComponent(q)}`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                    }
+                });
+
+                const data = await res.json();
+                render(data);
+
+            } catch {
+                results.innerHTML = '<p class="text-center text-red-500">Erreur lors de la recherche</p>';
+            }
+        }
+
+        function render(list) {
+
+            if (!list.length) {
+                results.innerHTML = '<p class="text-center text-gray-500">Aucun résultat</p>';
+                return;
+            }
+
+            results.innerHTML = '';
+
+            list.forEach(b => {
+
+                const div = document.createElement('div');
+                div.className = 'flex gap-3 border p-3 rounded';
+
+                div.innerHTML = `
+                <img src="${b.image || fallbackImage}" class="h-[100px]">
+
+                <div class="flex-1">
+                    <p class="font-semibold">${b.nom}</p>
+                    <p class="text-sm text-gray-600">${b.pays || ''} ${b.format ? '| ' + b.format + ' ml' : ''} ${b.type ? '| ' + b.type : ''}</p>
+
+                    <form method="POST" action="${storeUrl}" class="mt-2 flex gap-2">
+                        <input type="hidden" name="_token" value="${csrf}">
+                        <input type="hidden" name="id_bouteille" value="${b.id}">
+                        <input type="number" name="quantite" value="1" min="1" class="border px-2 w-16 rounded">
+                        <button class="bg-[#A83248] text-white px-3 rounded text-sm">
+                            Ajouter
+                        </button>
+                    </form>
+                </div>
+            `;
+
+                results.appendChild(div);
+            });
+        }
+    });
+</script>
 
 @endsection
