@@ -3,15 +3,6 @@
 @section('content')
 
     <script type="module" src="{{ asset('js/filtre.js') }}"></script>
-    <script type="module" src="{{ asset('js/message-flash.js') }}"></script>
-
-    <!-- Message lorsqu'un id ne retourne aucune bouteille -->
-    @if (session('status'))
-        <div id="flash-alert" role="alert" aria-live="polite"
-            class="mb-4 flex items-start gap-3 bg-red-50 border border-red-200 text-red-800 rounded-md p-3">
-            <div class="flex-1 text-sm">{{ session('status') }}</div>
-        </div>
-    @endif
 
     <form method="GET" action="{{ url()->current() }}">
         <div class="m-4">
