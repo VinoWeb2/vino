@@ -1,20 +1,15 @@
 <?php
 
-use App\Http\Controllers\Admin\InventaireSaqController;
+use App\Http\Controllers\InventaireSaqController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BouteilleController;
+use App\Http\Controllers\CatalogueController;
+use App\Http\Controllers\CellierController;
+use App\Http\Controllers\InventaireController;
+use App\Http\Controllers\RegisterController;
 use App\Models\Bouteille;
-use App\Models\Utilisateur;
-use App\Models\Role;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\BouteilleController;
-use App\Http\Controllers\AuthController;
-use App\Http\Requests\InscriptionRequest;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Auth\Events\Registered;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\CatalogueController;
-use App\Http\Controllers\RegisterController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,40 +18,75 @@ use App\Http\Controllers\RegisterController;
 |
 | Ce fichier contient les routes Web de l'application.
 | Il permet :
-| - d'afficher la page d'accueil ;
+| - d'afficher les pages publiques ;
+| - de gérer les pages accessibles aux utilisateurs connectés ;
 | - de lancer la mise à jour de l'inventaire SAQ côté admin ;
 | - de tester manuellement la connexion à l'API SAQ via une route temporaire.
 |
 */
 
-
 /**
- * Routes en étant connecté
+ * Routes accessibles uniquement aux utilisateurs connectés.
  */
-Route::middleware('auth')->group(function() {
-
+Route::middleware('auth')->group(function () {
   /**
- * Route de la page d'accueil.
- */
+   * Route de la page d'accueil.
+   *
+   * @return \Illuminate\View\View
+   */
   Route::get('/accueil', function () {
     return view('welcome');
   })->name('accueil');
 
   /**
- * Route vers le catalogue
- */
-  Route::get('/catalogue', [CatalogueController::class, 'index'])->name('catalogue.index');
+   * Route vers le catalogue des bouteilles.
+   */
+  Route::get('/catalogue', [CatalogueController::class, 'index'])
+    ->name('catalogue.index');
 
   /**
- * Route vers la fiche détail
- */
+   * Route vers la fiche détail d'une bouteille.
+   */
   Route::get('/bouteilles/{bouteille}', [BouteilleController::class, 'show'])
     ->name('bouteilles.show')
-    ->missing(function(){
-      return redirect()->route('catalogue.index')
+    ->missing(function () {
+      return redirect()
+        ->route('catalogue.index')
         ->with('status', 'Cette bouteille est introuvable.');
     });
-  });
+
+  /**
+   * Routes de gestion des celliers.
+   *
+   * Génère automatiquement :
+   * - celliers.index
+   * - celliers.create
+   * - celliers.store
+   * - celliers.show
+   * - celliers.edit
+   * - celliers.update
+   * - celliers.destroy
+   */
+  Route::resource('celliers', CellierController::class);
+
+  /**
+   * Ajoute une bouteille dans un cellier.
+   */
+  Route::post('/celliers/{cellier}/inventaires', [InventaireController::class, 'store'])
+    ->name('inventaires.store');
+
+  /**
+   * Met à jour une ligne d'inventaire.
+   */
+  Route::put('/inventaires/{inventaire}', [InventaireController::class, 'update'])
+    ->name('inventaires.update');
+
+  /**
+   * Supprime une ligne d'inventaire.
+   */
+  Route::delete('/inventaires/{inventaire}', [InventaireController::class, 'destroy'])
+    ->name('inventaires.destroy');
+});
 
 /**
  * Route permettant à l'administrateur de déclencher
@@ -66,26 +96,28 @@ Route::post('/admin/saq/update', [InventaireSaqController::class, 'mettreAJour']
   ->name('admin.saq.update');
 
 /**
- * Recherche un attribut spécifique dans la liste des attributs SAQ
+ * Recherche un attribut spécifique dans la liste des attributs SAQ.
  *
  * @param array $attributes
  * @param string $nomRecherche
  * @return string|null
  */
-
 function trouverAttribut(array $attributes, string $nomRecherche): ?string
 {
   foreach ($attributes as $attribute) {
     if (($attribute['name'] ?? '') === $nomRecherche) {
-
       $valeur = $attribute['value'] ?? null;
 
-      // Si la valeur est un tableau → on la transforme en string
+      /**
+       * Si la valeur est un tableau, elle est convertie en chaîne de caractères.
+       */
       if (is_array($valeur)) {
         return implode(', ', array_map('strval', $valeur));
       }
 
-      // Sinon on retourne une string ou null
+      /**
+       * Retourne la valeur sous forme de chaîne de caractères ou null.
+       */
       return $valeur !== null ? (string) $valeur : null;
     }
   }
@@ -93,15 +125,15 @@ function trouverAttribut(array $attributes, string $nomRecherche): ?string
   return null;
 }
 
-
-/*
- Routes pour l'inscription.
+/**
+ * Routes pour l'inscription.
  */
 Route::get('/inscription', function () {
   return view('auth.inscription');
 })->name('inscription.form');
 
-Route::post('/inscription', [RegisterController::class, 'store'])->name('inscription.submit');
+Route::post('/inscription', [RegisterController::class, 'store'])
+  ->name('inscription.submit');
 
 /**
  * Routes pour la connexion.
@@ -174,6 +206,13 @@ Route::get('/test-saq', function () {
     'query' => $query,
   ]);
 
+  if ($response->failed()) {
+    return response()->json([
+      'message' => 'Erreur lors de la requête à la SAQ.',
+      'details' => $response->body(),
+    ], $response->status());
+  }
+
   $data = $response->json();
   $items = $data['data']['productSearch']['items'] ?? [];
 
@@ -193,40 +232,6 @@ Route::get('/test-saq', function () {
       [
         'nom' => $item['productView']['name'],
         'type' => $type,
-        'pays' => $pays,
-        'cepage' => $cepage,
-        'millesime' => is_numeric($millesime) ? (int) $millesime : null,
-        'taux_alcool' => is_numeric($alcool) ? (float) $alcool : null,
-        'prix' => $item['product']['price_range']['minimum_price']['regular_price']['value'] ?? null,
-        'est_saq' => true,
-      ]
-    );
-  }
-
-  if ($response->failed()) {
-    return response()->json([
-      'message' => 'Erreur lors de la requête à la SAQ.',
-      'details' => $response->body(),
-    ], $response->status());
-  }
-
-  $data = $response->json();
-  $items = $data['data']['productSearch']['items'] ?? [];
-
-  foreach ($items as $item) {
-    $attributes = $item['productView']['attributes'] ?? [];
-
-    $pays = trouverAttribut($attributes, 'pays_origine');
-    $cepage = trouverAttribut($attributes, 'cepage');
-    $millesime = trouverAttribut($attributes, 'millesime_produit');
-    $alcool = trouverAttribut($attributes, 'pourcentage_alcool_par_volume');
-
-    Bouteille::updateOrCreate(
-      [
-        'code_saq' => $item['productView']['sku'] ?? null,
-      ],
-      [
-        'nom' => $item['productView']['name'] ?? null,
         'pays' => $pays,
         'cepage' => $cepage,
         'millesime' => is_numeric($millesime) ? (int) $millesime : null,
