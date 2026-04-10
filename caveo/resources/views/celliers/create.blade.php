@@ -2,37 +2,44 @@
 
 @section('title', 'Créer un cellier')
 
+@section('fleche')
+<a href="{{ route('celliers.index') }}" class="text-white text-2xl leading-none" aria-label="Retour">
+    ←
+</a>
+@endsection
+
 @section('content')
-<div class="flex justify-center px-4 sm:px-6 lg:px-8 py-12 pb-24">
-    <div class="max-w-md w-full bg-white border border-[#E0E0E0] rounded-lg shadow-sm p-8">
 
-        <h2 class="text-2xl font-semibold text-[#1A1A1A] text-center mb-6">
-            Créer un cellier
-        </h2>
+<div class="m-4">
+    <h1 class="text-3xl text-[#7A1E2E]" style="font-family: 'Crimson Text', serif;">
+        Créer un cellier
+    </h1>
+    <p class="text-sm text-gray-600 mt-1 font-roboto">
+        Ajoutez un nouveau cellier à votre collection.
+    </p>
+</div>
 
-        <x-alerts />
+<div class="m-4">
+    <x-alerts />
+</div>
 
-        <form method="POST" action="{{ route('celliers.store') }}" class="space-y-5" novalidate>
-            @csrf
+<div class="m-4 border p-4 rounded bg-white font-roboto">
+    <form method="POST" action="{{ route('celliers.store') }}" class="flex flex-col gap-5" novalidate>
+        @csrf
 
-            @include('celliers._form')
+        @include('celliers._form')
 
-            <button type="submit" class="w-full bg-[#7A1E2E] text-white py-2 rounded-lg">
+        <div class="flex gap-3 pt-2">
+            <button type="submit" class="w-1/2 bg-[#A83248] text-white py-3 rounded font-medium">
                 Enregistrer
             </button>
-        </form>
 
-        <div class="flex items-center my-5">
-            <div class="grow border-t border-gray-300"></div>
-            <span class="px-3 text-[#666666]">ou</span>
-            <div class="grow border-t border-gray-300"></div>
-        </div>
-
-        <div class="text-center text-sm">
-            <a href="{{ route('celliers.index') }}" class="text-[#7A1E2E] underline">
-                Retour à mes celliers
+            <a href="{{ route('celliers.index') }}"
+                class="w-1/2 text-center border py-3 rounded font-medium">
+                Annuler
             </a>
         </div>
-    </div>
+    </form>
 </div>
+
 @endsection
