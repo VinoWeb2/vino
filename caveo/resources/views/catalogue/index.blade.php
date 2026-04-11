@@ -5,18 +5,21 @@
 
 <script type="module" src="{{ asset('js/filtre.js') }}"></script>
 <script type="module" src="{{ asset('js/cellier-overlay.js') }}"></script>
+<script type="module" src="{{ asset('js/cellier-overlay.js') }}"></script>
+<script type='module' src="{{ asset('js/recherche.js') }}"></script>
+<script type='module' src="{{ asset('js/renitialiser-bouton.js') }}"></script>
 
-<form method="GET" action="{{ url()->current() }}">
+<form method="GET" action="{{ url()->current() }}" id="search-form" >
     <div class="m-4">
         <div class="flex gap-2 items-stretch">
             <input type="text" name="recherche"
                 value="{{ request('recherche') }}"
                 placeholder="Rechercher une bouteille..."
-                class="border rounded px-3 h-12 w-full">
+                class="border rounded px-3 h-12 w-full"
+                id="search-input">
 
-            <button type="submit"
-                class="bg-[#A83248] text-white px-4 h-12 rounded flex items-center justify-center">
-                <img src="{{ asset('images/recherche/recherche-blanc.svg') }}" alt="" class="w-6 h-6">
+            <button type="submit" id="clearBtn" class="bg-[#7A2B3A] text-white px-4 h-12 rounded flex items-center justify-center">
+                <img src="{{ asset('images/symbole_x/symbole-x.svg') }}" alt="" class="w-6 h-6">
             </button>
         </div>
 
