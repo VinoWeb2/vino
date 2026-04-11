@@ -242,6 +242,11 @@ class ImporterSaq extends Command
       return false;
     }
 
+    if ($this->trouverAttribut($attributes, 'type_contenant') !== 'Verre') {
+      $this->line("Produit ignoré (contenant non retenu) : {$nom}");
+      return false;
+    }
+
     $bouteille = Bouteille::updateOrCreate(
       [
         'code_saq' => $codeSaq,
