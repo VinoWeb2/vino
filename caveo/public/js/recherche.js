@@ -2,6 +2,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const searchInput = document.getElementById("search-input");
     const searchForm = document.getElementById("search-form");
 
+    let timeout; // Declare the timeout variable here
+
     // Écouter les changements dans le champ de recherche
     searchInput.addEventListener("input", function () {
         const query = searchInput.value.trim();
@@ -23,6 +25,6 @@ document.addEventListener("DOMContentLoaded", function () {
         // Attendre 3 secondes avant de soumettre le formulaire
         timeout = setTimeout(function () {
             searchForm.submit();
-        }, 3000);
+        }, 2000);
     });
 });
