@@ -26,34 +26,6 @@
             <p><strong>Description :</strong> {{ $cellier->description }}</p>
             @endif
         </div>
-
-        {{-- Actions cellier --}}
-        <div class="mt-4 flex flex-wrap gap-y-2">
-            <a href="{{ route('celliers.index') }}"
-                class="px-4 py-2 bg-[#A83248] text-white rounded text-sm">
-                Voir les celliers
-            </a>
-
-            <div class="w-full flex items-center gap-4">
-                <a href="{{ route('celliers.edit', $cellier) }}"
-                    class="text-xs leading-none text-gray-500 hover:text-gray-700">
-                    Modifier
-                </a>
-
-                <form method="POST"
-                    action="{{ route('celliers.destroy', $cellier) }}"
-                    class="m-0 p-0 inline-flex">
-                    @csrf
-                    @method('DELETE')
-
-                    <button type="submit"
-                        onclick="return confirm('Supprimer ce cellier ?')"
-                        class="text-xs leading-none text-red-500 hover:text-red-700">
-                        Supprimer
-                    </button>
-                </form>
-            </div>
-        </div>
     </div>
 
     <x-alerts />
@@ -116,62 +88,80 @@
                 </p>
                 @endif
 
-                {{-- Contrôle quantité + / - --}}
-                <form method="POST"
-                    action="{{ route('inventaires.update', $inventaire) }}"
-                    class="mt-3 flex items-center gap-2">
-                    @csrf
-                    @method('PUT')
+                {{-- Contrôle quantité avec icônes --}}
+                <div class="mt-4 flex items-center justify-between w-full">
 
-                    <button type="button"
-                        onclick="updateQty(this, -1)"
-                        class="px-3 py-1 border rounded">
-                        −
-                    </button>
+                    <!-- Moins -->
+                    <form method="POST"
+                        action="{{ route('inventaires.updateQuantite', $inventaire) }}"
+                        class="w-1/3">
+                        @csrf
+                        @method('PATCH')
 
-                    <input type="hidden"
-                        name="quantite"
-                        value="{{ $inventaire->quantite }}"
-                        class="qty-input">
+                        <input type="hidden" name="quantite" value="{{ max(0, $inventaire->quantite - 1) }}">
 
-                    <span class="w-6 text-center font-semibold qty-display">
-                        {{ $inventaire->quantite }}
-                    </span>
+                        <button type="submit"
+                            class="w-full flex items-center justify-center py-5 rounded-lg hover:bg-gray-100 active:scale-95 transition"
+                            aria-label="Diminuer la quantité">
+                            <img src="{{ asset('images/icons/cercle-moins.svg') }}"
+                                alt=""
+                                aria-hidden="true"
+                                class="w-10 h-10">
+                        </button>
+                    </form>
 
-                    <button type="button"
-                        onclick="updateQty(this, 1)"
-                        class="px-3 py-1 border rounded">
-                        +
-                    </button>
+                    <!-- Quantité -->
+                    <div class="w-1/3 text-center">
+                        <span class="text-2xl font-semibold">
+                            {{ $inventaire->quantite }}
+                        </span>
+                    </div>
 
-                    <button type="submit"
-                        class="ml-2 px-3 py-1 bg-[#A83248] text-white text-sm rounded">
-                        OK
-                    </button>
-                </form>
+                    <!-- Plus -->
+                    <form method="POST"
+                        action="{{ route('inventaires.updateQuantite', $inventaire) }}"
+                        class="w-1/3">
+                        @csrf
+                        @method('PATCH')
+
+                        <input type="hidden" name="quantite" value="{{ min(999, $inventaire->quantite + 1) }}">
+
+                        <button type="submit"
+                            class="w-full flex items-center justify-center py-5 rounded-lg hover:bg-gray-100 active:scale-95 transition"
+                            aria-label="Augmenter la quantité">
+                            <img src="{{ asset('images/icons/cercle-plus.svg') }}"
+                                alt=""
+                                aria-hidden="true"
+                                class="w-10 h-10">
+                        </button>
+                    </form>
+
+                </div>
 
                 <p class="text-xs text-gray-500 mt-1">
-                    Mets 0 si la bouteille a été bue.
+                    La quantité peut être à 0 si la bouteille a été bue.
                 </p>
 
                 {{-- Actions bouteille --}}
-                <div class="flex gap-3 mt-3 items-center">
+                <div class="mt-4 flex gap-3">
+                    <!-- Bouton Détail -->
                     @if($inventaire->bouteille)
-                    <a href="{{ route('bouteilles.show', $inventaire->bouteille->id) }}"
-                        class="px-3 py-1 bg-[#A83248] text-white text-sm rounded">
+                    <a href="{{ route('bouteilles.show', $inventaire->bouteille->id) }}?source=cellier"
+                        class="w-1/2 text-center bg-[#A83248] text-white py-2 rounded text-sm font-medium">
                         Détail
                     </a>
                     @endif
 
+                    <!-- Bouton Supprimer -->
                     <form method="POST"
                         action="{{ route('inventaires.destroy', $inventaire) }}"
-                        class="inline-flex">
+                        class="w-1/2">
                         @csrf
                         @method('DELETE')
 
                         <button type="submit"
                             onclick="return confirm('Supprimer cette bouteille ?')"
-                            class="text-xs text-red-500">
+                            class="w-full text-center border border-red-300 text-red-600 py-2 rounded text-sm font-medium hover:bg-red-50 transition">
                             Supprimer
                         </button>
                     </form>
@@ -350,27 +340,6 @@
             });
         }
     });
-
-    /**
-     * Met à jour la quantité via les boutons + et -.
-     *
-     * @param {HTMLElement} btn
-     * @param {number} delta
-     */
-    function updateQty(btn, delta) {
-        const form = btn.closest('form');
-        const input = form.querySelector('.qty-input');
-        const display = form.querySelector('.qty-display');
-
-        let value = parseInt(input.value, 10);
-        value += delta;
-
-        if (value < 0) value = 0;
-        if (value > 999) value = 999;
-
-        input.value = value;
-        display.textContent = value;
-    }
 </script>
 
 @endsection
