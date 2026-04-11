@@ -66,31 +66,27 @@
         </div>
 
         {{-- Actions --}}
-        <div class="mt-3 flex items-center gap-3">
-            <!-- Voir -->
+        <div class="mt-4 flex items-center gap-2 w-full">
             <a href="{{ route('celliers.show', $cellier) }}"
-                class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 transition"
-                title="Voir">
-                <img src="{{ asset('images/icons/oeil.svg') }}" alt="icon noir d'un oeil" class="w-6 h-6">
+                class="flex-1 text-center bg-[#A83248] text-white py-2 rounded text-sm font-medium">
+                Voir
             </a>
 
-            <!-- Modifier -->
             <a href="{{ route('celliers.edit', $cellier) }}"
-                class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 transition"
-                title="Modifier">
-                <img src="{{ asset('images/icons/crayon.svg') }}" alt="icon noir d'un crayon" class="w-6 h-6">
+                class="flex-1 text-center border border-gray-300 text-gray-700 py-2 rounded text-sm font-medium hover:bg-gray-50 transition">
+                Modifier
             </a>
 
-            <!-- Supprimer -->
-            <form method="POST" action="{{ route('celliers.destroy', $cellier) }}">
+            <form method="POST"
+                action="{{ route('celliers.destroy', $cellier) }}"
+                class="flex-1">
                 @csrf
                 @method('DELETE')
 
                 <button type="submit"
                     onclick="return confirm('Supprimer ce cellier ?')"
-                    class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-red-50 transition"
-                    title="Supprimer">
-                    <img src="{{ asset('images/icons/poubelle.svg') }}" alt="icon noir d'une poubelle" class="w-6 h-6">
+                    class="w-full text-center border border-red-300 text-red-600 py-2 rounded text-sm font-medium hover:bg-red-50 transition">
+                    Supprimer
                 </button>
             </form>
         </div>
