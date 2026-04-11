@@ -37,7 +37,7 @@ class CatalogueController extends Controller
             $recherche = trim($request->recherche);
 
             $query->where(function ($q) use ($recherche) {
-                $q->where('nom', 'like', $recherche . '%');
+                $q->where('nom', 'like', '%' . $recherche . '%');
             });
         }
 
