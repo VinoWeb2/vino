@@ -35,6 +35,8 @@ class Cellier extends Model
         'emplacement',
     ];
 
+    public $timestamps = false;
+
     /**
      * Retourne l'utilisateur propriétaire du cellier.
      *

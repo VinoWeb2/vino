@@ -23,7 +23,7 @@
     <x-alerts />
 </div>
 
-<div class="m-4 border p-4 rounded bg-white font-roboto">
+<div class="m-4 border p-4 mb-24 rounded bg-white font-roboto">
     <form method="POST" action="{{ route('celliers.store') }}" class="flex flex-col gap-5" novalidate>
         @csrf
 
