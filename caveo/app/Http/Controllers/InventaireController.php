@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
  * Gère les opérations liées à l'inventaire d'un cellier :
  * - ajout d'une bouteille
  * - mise à jour de la quantité
+ * - mise à jour rapide via boutons + / -
  * - suppression
  */
 class InventaireController extends Controller
@@ -67,14 +68,46 @@ class InventaireController extends Controller
     }
 
     /**
-     * Met à jour la quantité d'une bouteille.
-     * Si la quantité devient 0, la bouteille est supprimée.
+     * Met à jour la quantité d'une bouteille dans le cellier.
+     *
+     * Une quantité de 0 est autorisée afin d'indiquer
+     * qu'il n'y a plus de stock.
      *
      * @param \Illuminate\Http\Request $request
      * @param \App\Models\Inventaire $inventaire
      * @return \Illuminate\Http\RedirectResponse
      */
     public function update(Request $request, Inventaire $inventaire)
+    {
+        $this->verifierProprietaireInventaire($inventaire);
+
+        $validated = $request->validate([
+            'quantite' => 'required|integer|min:0|max:999',
+        ], [
+            'quantite.required' => 'La quantité est obligatoire.',
+            'quantite.integer' => 'La quantité doit être un nombre entier.',
+            'quantite.min' => 'La quantité ne peut pas être négative.',
+            'quantite.max' => 'La quantité ne peut pas dépasser 999.',
+        ]);
+
+        $inventaire->update([
+            'quantite' => $validated['quantite'],
+        ]);
+
+        return redirect()
+            ->route('celliers.show', $inventaire->id_cellier)
+            ->with('status', 'La quantité a été mise à jour.');
+    }
+
+    /**
+     * Met à jour rapidement la quantité d'une bouteille
+     * à l'aide des boutons + et -.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Models\Inventaire $inventaire
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function updateQuantite(Request $request, Inventaire $inventaire)
     {
         $this->verifierProprietaireInventaire($inventaire);
 

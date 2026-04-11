@@ -3,113 +3,126 @@
 namespace App\Http\Controllers;
 
 use App\Models\Bouteille;
-use App\Http\Controllers\Controller;
+use App\Models\Cellier;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
+/**
+ * Contrôleur du catalogue.
+ *
+ * Gère :
+ * - l'affichage paginé des bouteilles ;
+ * - la recherche textuelle ;
+ * - les filtres (type, pays, format, millésime) ;
+ * - le tri par nom ;
+ * - la récupération des celliers de l'utilisateur connecté
+ *   pour l'ajout au cellier depuis le catalogue.
+ */
 class CatalogueController extends Controller
 {
-    public function index()
+    /**
+     * Affiche le catalogue des bouteilles.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\View\View
+     */
+    public function index(Request $request)
     {
         $query = Bouteille::query();
 
-        // Recherche texte
-        if ($search = request('recherche')) {
-            $query->where('nom', 'like', $search . '%');
+        /**
+         * Recherche textuelle.
+         */
+        if ($request->filled('recherche')) {
+            $recherche = trim($request->recherche);
+
+            $query->where(function ($q) use ($recherche) {
+                $q->where('nom', 'like', '%' . $recherche . '%')
+                    ->orWhere('pays', 'like', '%' . $recherche . '%')
+                    ->orWhere('type', 'like', '%' . $recherche . '%')
+                    ->orWhere('cepage', 'like', '%' . $recherche . '%');
+            });
         }
 
-        // Filtre par types (OU)
-        if ($types = request('types')) {
-            $query->whereIn('type', $types);
+        /**
+         * Filtres.
+         */
+        if ($request->filled('types')) {
+            $query->whereIn('type', $request->types);
         }
 
-        // Filtre par pays (OU)
-        if ($pays = request('pays')) {
-            $query->whereIn('pays', $pays);
+        if ($request->filled('pays')) {
+            $query->whereIn('pays', $request->pays);
         }
 
-        // Filtre par formats (CHOIX UNIQUE)
-        if ($formats = request('formats')) {
-            // Si un format est sélectionné (une seule valeur)
-            if (!empty($formats)) {
-                $query->where('format', $formats);
-            }
+        if ($request->filled('formats')) {
+            $query->where('format', $request->formats);
         }
 
-        // Filtre par millésimes (CHOIX UNIQUE)
-        if ($millesimes = request('millesimes')) {
-            // Si un millésime est sélectionné (une seule valeur)
-            if (!empty($millesimes)) {
-                $query->where('millesime', $millesimes);
-            }
+        if ($request->filled('millesimes')) {
+            $query->where('millesime', $request->millesimes);
         }
 
-        // Tri
-        if ($tri = request('tri_nom')) {
-            $query->orderBy('nom', $tri);
+        /**
+         * Tri par nom.
+         */
+        if ($request->tri_nom === 'asc') {
+            $query->orderBy('nom', 'asc');
+        } elseif ($request->tri_nom === 'desc') {
+            $query->orderBy('nom', 'desc');
+        } else {
+            $query->orderBy('nom', 'asc');
         }
 
-        // Pagination
-        $bouteilles = $query->paginate(25)->withQueryString();
+        /**
+         * Pagination.
+         */
+        /** @var \Illuminate\Pagination\LengthAwarePaginator $bouteilles */
+        $bouteilles = $query->paginate(12)->withQueryString();
 
-        // TYPES
-        $selectedTypes = request('types', []);
+        /**
+         * Valeurs distinctes pour les filtres.
+         */
         $types = Bouteille::whereNotNull('type')
+            ->where('type', '!=', '')
             ->distinct()
-            ->pluck('type')
-            ->sortBy(function ($type) use ($selectedTypes) {
-                return [
-                    !in_array($type, $selectedTypes),
-                    $type
-                ];
-            })
-            ->values();
+            ->orderBy('type')
+            ->pluck('type');
 
-        // PAYS
-        $selectedPays = request('pays', []);
         $pays = Bouteille::whereNotNull('pays')
+            ->where('pays', '!=', '')
             ->distinct()
-            ->pluck('pays')
-            ->sortBy(function ($p) use ($selectedPays) {
-                return [
-                    !in_array($p, $selectedPays),
-                    $p
-                ];
-            })
-            ->values();
+            ->orderBy('pays')
+            ->pluck('pays');
 
-        // FORMATS (choix unique)
-        $selectedFormats = request('formats', null);
         $formats = Bouteille::whereNotNull('format')
             ->distinct()
-            ->orderByRaw('CAST(format AS UNSIGNED) ASC')
-            ->pluck('format')
-            ->sortBy(function ($f) use ($selectedFormats) {
-                return [
-                    $f != $selectedFormats,
-                    (int) $f
-                ];
-            })
-            ->values();
+            ->orderBy('format')
+            ->pluck('format');
 
-        // MILLÉSIMES (choix unique)
-        $selectedMillesimes = request('millesimes', null);
         $millesimes = Bouteille::whereNotNull('millesime')
             ->distinct()
-            ->pluck('millesime')
-            ->sortBy(function ($m) use ($selectedMillesimes) {
-                return [
-                    $m != $selectedMillesimes,
-                    $m
-                ];
-            })
-            ->values();
+            ->orderBy('millesime', 'desc')
+            ->pluck('millesime');
+
+        /**
+         * Celliers de l'utilisateur connecté.
+         */
+        $celliers = collect();
+
+        if (Auth::check()) {
+            $celliers = Cellier::where('id_utilisateur', Auth::id())
+                ->orderBy('nom')
+                ->get();
+        }
 
         return view('catalogue.index', compact(
             'bouteilles',
             'types',
             'pays',
             'formats',
-            'millesimes'
+            'millesimes',
+            'celliers'
         ));
     }
 }

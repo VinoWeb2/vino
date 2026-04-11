@@ -93,6 +93,13 @@ Route::middleware('auth')->group(function () {
     ->name('inventaires.update');
 
   /**
+   * Met à jour rapidement la quantité d'une bouteille
+   * à l'aide des boutons + et -.
+   */
+  Route::patch('/inventaires/{inventaire}/quantite', [InventaireController::class, 'updateQuantite'])
+    ->name('inventaires.updateQuantite');
+
+  /**
    * Supprime une ligne d'inventaire.
    */
   Route::delete('/inventaires/{inventaire}', [InventaireController::class, 'destroy'])
