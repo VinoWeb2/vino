@@ -120,7 +120,7 @@
         </div>
 
         <!-- Actions sticky -->
-        <div class="sticky bottom-0 bg-white z-50 border-t mb-2">
+        <div class="sticky bottom-0 bg-white z-50 border-t mb-5">
             <div class="flex flex-row gap-4 pt-4">
                 <a href="{{ url()->current() }}?recherche={{ request('recherche') }}"
                     class="w-1/2 text-center border py-3 rounded font-medium text-sm">
