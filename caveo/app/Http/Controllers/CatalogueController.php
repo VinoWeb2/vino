@@ -37,10 +37,7 @@ class CatalogueController extends Controller
             $recherche = trim($request->recherche);
 
             $query->where(function ($q) use ($recherche) {
-                $q->where('nom', 'like', '%' . $recherche . '%')
-                    ->orWhere('pays', 'like', '%' . $recherche . '%')
-                    ->orWhere('type', 'like', '%' . $recherche . '%')
-                    ->orWhere('cepage', 'like', '%' . $recherche . '%');
+                $q->where('nom', 'like', $recherche . '%');
             });
         }
 
@@ -70,15 +67,13 @@ class CatalogueController extends Controller
             $query->orderBy('nom', 'asc');
         } elseif ($request->tri_nom === 'desc') {
             $query->orderBy('nom', 'desc');
-        } else {
-            $query->orderBy('nom', 'asc');
         }
 
         /**
          * Pagination.
          */
         /** @var \Illuminate\Pagination\LengthAwarePaginator $bouteilles */
-        $bouteilles = $query->paginate(12)->withQueryString();
+        $bouteilles = $query->paginate(25)->withQueryString();
 
         /**
          * Valeurs distinctes pour les filtres.
