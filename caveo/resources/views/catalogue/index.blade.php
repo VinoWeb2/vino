@@ -5,20 +5,24 @@
 
 <script type="module" src="{{ asset('js/filtre.js') }}"></script>
 <script type="module" src="{{ asset('js/cellier-overlay.js') }}"></script>
+<script type="module" src="{{ asset('js/cellier-overlay.js') }}"></script>
+<script type='module' src="{{ asset('js/recherche.js') }}"></script>
+<script type='module' src="{{ asset('js/renitialiser-bouton.js') }}"></script>
 
-<form method="GET" action="{{ url()->current() }}">
+<form method="GET" action="{{ url()->current() }}" id="search-form" >
     <div class="m-4">
         <div class="flex gap-2 items-stretch">
             <input type="text" name="recherche"
                 value="{{ request('recherche') }}"
                 placeholder="Rechercher une bouteille..."
-                class="border rounded px-3 h-12 w-full">
+                class="border rounded px-3 h-12 w-full"
+                id="search-input">
 
-            <button type="submit"
-                class="bg-[#A83248] text-white px-4 h-12 rounded flex items-center justify-center">
-                <img src="{{ asset('images/recherche/recherche-blanc.svg') }}" alt="" class="w-6 h-6">
+            <button type="submit" id="clearBtn" class="bg-[#7A2B3A] text-white px-4 h-12 rounded flex items-center justify-center">
+                <img src="{{ asset('images/symbole/symbole-x.svg') }}" alt="" class="w-6 h-6">
             </button>
         </div>
+        <p class="italic font-bold text-sm md:text-base" style="color: #7A1E2E;">Se soumet automatiquement après 3 secondes</p>
 
         <div class="mt-2">
             <button type="button" id="openFilters"
@@ -179,8 +183,8 @@
 
         <div class="flex gap-2 flex-wrap">
             <a href="{{ route('bouteilles.show', $bouteille->id) }}?source=catalogue"
-                class="px-4 py-2 bg-[#A83248] text-white rounded text-sm font-medium w-max">
-                Détail
+                class="px-2.5 py-2 border border-gray-300 text-white rounded text-sm font-medium flex items-center gap-2 w-max">
+                <img src="{{ asset('images/symbole/info-red.svg') }}" alt="information" class="w-6 h-6">
             </a>
 
             @if($celliers->isNotEmpty())
