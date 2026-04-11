@@ -4,6 +4,7 @@
 @section('content')
 
 <script type="module" src="{{ asset('js/filtre.js') }}"></script>
+<script type="module" src="{{ asset('js/cellier-overlay.js') }}"></script>
 
 <form method="GET" action="{{ url()->current() }}">
     <div class="m-4">
@@ -120,7 +121,7 @@
         </div>
 
         <!-- Actions sticky -->
-        <div class="sticky bottom-0 bg-white z-50 border-t">
+        <div class="sticky bottom-0 bg-white z-50 border-t mb-5">
             <div class="flex flex-row gap-4 pt-4">
                 <a href="{{ url()->current() }}?recherche={{ request('recherche') }}"
                     class="w-1/2 text-center border py-3 rounded font-medium text-sm">
