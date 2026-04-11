@@ -191,7 +191,7 @@
             </button>
             @else
             <a href="{{ route('celliers.create') }}"
-                class="px-4 py-2 bg-gray-200 text-gray-500 rounded w-max">
+                class="px-4 py-2 bg-gray-200 text-gray-500 rounded text-sm font-medium w-max">
                 Créer un cellier
             </a>
             @endif
