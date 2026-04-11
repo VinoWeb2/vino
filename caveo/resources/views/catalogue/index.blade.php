@@ -278,7 +278,6 @@
 
                     {{-- Moins --}}
                     <button type="button"
-                        onclick="updateModalQty(-1)"
                         class="w-1/3 flex items-center justify-center py-5"
                         aria-label="Diminuer la quantité">
                         <img src="{{ asset('images/icons/cercle-moins.svg') }}"
@@ -296,7 +295,6 @@
 
                     {{-- Plus --}}
                     <button type="button"
-                        onclick="updateModalQty(1)"
                         class="w-1/3 flex items-center justify-center py-5"
                         aria-label="Augmenter la quantité">
                         <img src="{{ asset('images/icons/cercle-plus.svg') }}"
