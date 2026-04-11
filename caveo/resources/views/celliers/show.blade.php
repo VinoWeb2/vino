@@ -4,7 +4,7 @@
 
 @section('fleche')
 <a href="{{ route('celliers.index') }}" class="text-white text-2xl leading-none" aria-label="Retour">
-    ←
+    <img src="/images/fleches/gauche-blanc.svg" alt="Flèche de retour" class="w-10 h-10">
 </a>
 @endsection
 
