@@ -3,10 +3,6 @@
 @section('title', 'Mes celliers')
 
 @section('fleche')
-<!-- Flèche de retour qui revient vers le cellier ou le catalogue selon la source -->
-<a href="{{ route('celliers.index') }}" class="text-white text-2xl leading-none" aria-label="Retour">
-    <img src="/images/fleches/gauche-blanc.svg" alt="Flèche de retour" class="w-10 h-10">
-</a>
 
 @section('content')
 <script type="module" src="{{ asset('js/message-flash-auto.js') }}"></script>
