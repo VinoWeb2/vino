@@ -3,7 +3,7 @@
 @section('title', 'Mes celliers')
 
 @section('content')
-
+<script type="module" src="{{ asset('js/message-flash-auto.js') }}"></script>
 <div class="m-4 flex items-start justify-between gap-4">
     <div>
         <h1 class="text-3xl text-[#7A1E2E]" style="font-family: 'Crimson Text', serif;">

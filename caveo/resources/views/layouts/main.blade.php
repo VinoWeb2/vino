@@ -11,7 +11,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap"
         rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script type="module" src="{{ asset('js/message-flash-auto.js') }}"></script>
 </head>
 
 <body class="flex flex-col min-h-screen">
