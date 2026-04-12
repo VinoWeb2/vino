@@ -183,7 +183,7 @@
 
         <div class="flex gap-2 flex-wrap">
             <a href="{{ route('bouteilles.show', $bouteille->id) }}?source=catalogue"
-                class="px-2.5 py-2 border border-gray-300 text-white rounded text-sm font-medium flex items-center gap-2 w-max" title="Voir le détail de la bouteille">
+                class="px-2 py-2 border border-gray-300 rounded hover:bg-gray-100 flex items-center gap-2 w-max" title="Détail de la bouteille">
                 <img src="{{ asset('images/symbole/info.svg') }}" alt="information" class="w-6 h-6">
             </a>
 
@@ -283,9 +283,10 @@
                     {{-- Moins --}}
                     <button type="button"
                         class="w-1/3 flex items-center justify-center py-5"
-                        aria-label="Diminuer la quantité">
+                        aria-label="Diminuer la quantité"
+                        title="Diminuer la quantité">
                         <img src="{{ asset('images/icons/cercle-moins.svg') }}"
-                            alt=""
+                            alt="moins"
                             aria-hidden="true"
                             class="w-10 h-10">
                     </button>
@@ -300,9 +301,10 @@
                     {{-- Plus --}}
                     <button type="button"
                         class="w-1/3 flex items-center justify-center py-5"
-                        aria-label="Augmenter la quantité">
+                        aria-label="Augmenter la quantité"
+                        title="Augmenter la quantité">
                         <img src="{{ asset('images/icons/cercle-plus.svg') }}"
-                            alt=""
+                            alt="plus"
                             aria-hidden="true"
                             class="w-10 h-10">
                     </button>
