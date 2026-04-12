@@ -77,7 +77,18 @@
                     </div>
                 @endif
 
+            <!-- Taux d'alcool -->
+            @if ($bouteille->taux_alcool)
+            <div class="flex gap-2 mb-1 text-base">
+                <span class="font-medium">Taux d'alcool :</span>
+                <span class="flex-1 font-normal">
+                    {{ $bouteille->taux_alcool ? $bouteille->taux_alcool . '%' : 'Non spécifié' }}
+                </span>
+            </div>
+            @endif
 
+            @if ($bouteille->cepage || $bouteille->format)
+            <div class="flex justify-between item-start mb-1 text-base">
 
                 @if ($bouteille->cepage || $bouteille->format)
                     <div class="flex justify-between item-start mb-1 text-base">

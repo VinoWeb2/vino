@@ -1,105 +1,114 @@
 @extends('layouts.main')
-
-@section('title', 'Mes celliers')
-
+@section('title', 'Fiche détaillée')
 @section('fleche')
-
+<!-- Flèche de retour qui revient à la page précédente (Cellier ou Catalogue) -->
+<a href="{{ url()->previous() }}">
+    <img src="{{ asset('images/fleches/gauche-blanc.svg') }}" alt="Flèche de retour" class="w-10 h-10">
+</a>
+@endsection
 @section('content')
-<script type="module" src="{{ asset('js/message-flash-auto.js') }}"></script>
-<div class="m-4 flex items-start justify-between gap-4">
-    <div>
-        <h1 class="text-3xl text-[#7A1E2E]" style="font-family: 'Crimson Text', serif;">
-            Mes celliers
-        </h1>
-        <p class="text-sm text-gray-600 mt-1 font-roboto">
-            Consultez et gérez vos celliers.
-        </p>
-    </div>
+<!-- Titre de la page en fonction de l'origine (Cellier ou Catalogue) -->
+<div class="px-3 pt-4 pb-28">
+    <h2 class="mb-3 text-center text-xl text-[#7A1E2E]" style="font-family: 'Roboto', sans-serif;">
+        <!-- ATTENTION, AJUSTER LA SOURCE CELLIER AVEC LE BON NOM -->
+        {{ $source === 'cellier'
+        ? "Fiche détaillée de ma bouteille"
+        : "Fiche détaillée de la bouteille" }}
+    </h2>
+    <!-- Section Détails -->
+    <section>
+        <!-- Nom de la bouteille -->
+        <h3 class="mb-3 text-center text-l font-medium text-[#1A1A1A]" style="font-family: 'Roboto', sans-serif;">
+            {{ $bouteille->nom }}
+        </h3>
+        <!-- Section Image -->
+        <div class="relative mb-3 flex h-44 items-center justify-center">
+            <!-- Afficher l'image ou l'image par défaut si aucune image trouvée -->
+            @if ($bouteille->image)
+            <img src="{{ $bouteille->image }}" alt="{{ $bouteille->nom }}" class="max-h-full max-w-full object-contain">
+            @else
+            <img src="{{ asset('images/bouteilles/bouteille-placeholder.png') }}" alt="Image par défaut"
+                class="max-h-full max-w-full object-contain">
+            @endif
+            <!-- Afficher la pastille de goût s'il y en a une -->
+            @if ($bouteille->image_pastille)
+            <img src="{{ asset('images/pastilles/' . $bouteille->image_pastille) }}"
+                alt="{{ $bouteille->pastille_gout }}" class="absolute right-8 bottom-4 h-16 w-16 object-contain">
 
-    <a href="{{ route('celliers.create') }}"
-        class="bg-[#A83248] text-white px-4 py-3 rounded font-semibold whitespace-nowrap">
-        Nouveau
-    </a>
-</div>
-
-<div class="m-4">
-    <x-alerts />
-</div>
-
-@if($celliers->isEmpty())
-<div class="mt-[30px] mb-[30px] ml-4 mr-4 p-4 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded text-center">
-    Vous n’avez encore aucun cellier.
-</div>
-@else
-@foreach($celliers as $cellier)
-<div class="flex gap-6 m-4 mb-6 font-roboto border p-4 rounded bg-white">
-    {{-- Image cellier --}}
-    <div class="w-[90px] flex justify-center items-center shrink-0">
-        <img
-            src="{{ asset('images/bouteille-vide.png') }}"
-            alt="Illustration du cellier"
-            class="w-auto h-[135px]">
-    </div>
-
-    {{-- Contenu --}}
-    <div class="flex flex-col justify-between flex-1 min-w-0">
-        <div>
-            <h2 class="font-semibold text-lg break-words">
-                {{ $cellier->nom }}
-            </h2>
-
-            <div class="flex items-center text-sm text-gray-600 space-x-2 flex-wrap">
-                @if(!empty($cellier->emplacement))
-                <p>{{ $cellier->emplacement }}</p>
-                <span>|</span>
-                @endif
-
-                <p>{{ $cellier->inventaires_count ?? 0 }} bouteille(s)</p>
-            </div>
-
-            @if(!empty($cellier->description))
-            <p class="mt-2 font-medium mb-3 text-sm text-gray-700">
-                {{ $cellier->description }}
-            </p>
             @endif
         </div>
-
-        {{-- Actions --}}
-        <div class="mt-3 flex items-center justify-between gap-3">
-            <!-- Voir -->
-            <a href="{{ route('celliers.show', $cellier) }}"
-                class="px-2 py-2 border border-gray-300 rounded hover:bg-gray-100 flex items-center gap-2 text-gray-600 w-max"
-                title="Voir le cellier">
-                <span class="text-sm">Voir le cellier</span>
-            </a>
-
-            <div class="flex items-center gap-3">
-                <!-- Modifier -->
-                <a href="{{ route('celliers.edit', $cellier) }}"
-                    class="w-10 h-10 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-100"
-                    title="Modifier le cellier"
-                    aria-label="Modifier le cellier">
-                    <img src="{{ asset('images/icons/crayon.svg') }}" alt="" aria-hidden="true" class="w-6 h-6">
-                </a>
-
-                <!-- Supprimer -->
-                <form method="POST" action="{{ route('celliers.destroy', $cellier) }}" class="inline-flex">
-                    @csrf
-                    @method('DELETE')
-
-                    <button type="submit"
-                        onclick="return confirm('Supprimer ce cellier ?')"
-                        class="w-10 h-10 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-100"
-                        title="Supprimer le cellier"
-                        aria-label="Supprimer le cellier">
-                        <img src="{{ asset('images/icons/poubelle.svg') }}" alt="" aria-hidden="true" class="w-6 h-6">
-                    </button>
-                </form>
+        <!-- Détails principaux-->
+        @if ($bouteille->type)
+        <p class="mb-1 text-left text-base font-normal text-[#1A1A1A]" style="font-family: 'Roboto', sans-serif;">
+            {{ $bouteille->type }}
+        </p>
+        @endif
+        @if ($bouteille->pays)
+        <p class="mb-1 text-left text-base font-normal text-[#1A1A1A]" style="font-family: 'Roboto', sans-serif;">
+            {{ $bouteille->pays }}
+        </p>
+        @endif
+        <!-- Prix -->
+        <p class="mb-5 text-left text-base font-medium text-[#1A1A1A]" style="font-family: 'Roboto', sans-serif;">
+            @if ($bouteille->prix !== null)
+            {{ number_format($bouteille->prix, 2, ',', ' ') }}$
+            @endif
+        </p>
+        <!-- Détails secondaires -->
+        <div class="mt-3 pt-3 border-t border-[#E0E0E0] text-left text-[#1A1A1A]"
+            style="font-family: 'Roboto', sans-serif;">
+            <!-- Millésime -->
+            @if ($bouteille->millesime)
+            <div class="flex gap-2 mb-1 text-base">
+                <span class="font-medium">Millésime :</span>
+                <span class="flex-1 font-normal">
+                    {{ $bouteille->millesime}}
+                </span>
             </div>
-        </div>
-    </div>
-</div>
-@endforeach
-@endif
+            @endif
 
+            <!-- Taux d'alcool -->
+            @if ($bouteille->taux_alcool)
+            <div class="flex gap-2 mb-1 text-base">
+                <span class="font-medium">Taux d'alcool :</span>
+                <span class="flex-1 font-normal">
+                    {{ $bouteille->taux_alcool }} %
+                </span>
+            </div>
+            @endif
+
+
+
+            @if ($bouteille->cepage || $bouteille->format)
+            <div class="flex justify-between item-start mb-1 text-base">
+                <!-- Cépage(s) à gauche -->
+                @if ($bouteille->cepage)
+                <div class="flex gap-2 text-base">
+                    <span class="font-medium">Cépage(s) :</span>
+                    <span class="flex-1 font-normal">
+                        {{ $bouteille->cepage }}
+                    </span>
+                </div>
+                @endif
+                <!-- Format à droite -->
+                @if ($bouteille->format)
+                <span class="text-sm font-normal">
+                    {{ $bouteille->format }} ml
+                </span>
+                @endif
+            </div>
+            @endif
+
+
+            <!-- Description à afficher seulement s'il y en a une -->
+            @if (!empty($bouteille->description))
+            <div class="flex gap-2 mb-1 text-base">
+                <span class="font-medium">Description :</span>
+                <span class="flex-1 font-normal wrap-break-word">{{ $bouteille->description }}</span>
+            </div>
+            @endif
+        </div>
+        <!-- ATTENTION, AJOUTER LES BOUTONS ET LA QUANTITÉ -->
+    </section>
+</div>
 @endsection
