@@ -3,12 +3,14 @@
 @section('title', $cellier->nom)
 
 @section('fleche')
+<!-- Flèche de retour qui revient vers le cellier ou le catalogue selon la source -->
 <a href="{{ route('celliers.index') }}" class="text-white text-2xl leading-none" aria-label="Retour">
     <img src="{{ asset('images/fleches/gauche-blanc.svg') }}" alt="Flèche de retour" class="w-10 h-10">
 </a>
 @endsection
 
 @section('content')
+<script type="module" src="{{ asset('js/message-flash-auto.js') }}"></script>
 <section class="px-4 py-5 pb-48 max-w-5xl mx-auto font-roboto">
 
     {{-- Header --}}
