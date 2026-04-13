@@ -5,7 +5,6 @@
 
 <script type="module" src="{{ asset('js/filtre.js') }}"></script>
 <script type="module" src="{{ asset('js/cellier-overlay.js') }}"></script>
-<script type="module" src="{{ asset('js/cellier-overlay.js') }}"></script>
 <script type='module' src="{{ asset('js/recherche.js') }}"></script>
 <script type='module' src="{{ asset('js/renitialiser-bouton.js') }}"></script>
 
