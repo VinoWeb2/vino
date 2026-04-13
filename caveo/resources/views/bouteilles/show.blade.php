@@ -72,15 +72,13 @@
                     <div class="flex gap-2 mb-1 text-base">
                         <span class="font-medium">Taux d'alcool :</span>
                         <span class="flex-1 font-normal">
-                            {{ $bouteille->taux_alcool }} %
+                            {{ $bouteille->taux_alcool ? $bouteille->taux_alcool . '%' : 'Non spécifié' }}
                         </span>
                     </div>
                 @endif
 
-
-
                 @if ($bouteille->cepage || $bouteille->format)
-                    <div class="flex justify-between item-start mb-1 text-base">
+                    <div class="flex justify-between items-start mb-1 text-base">
                         <!-- Cépage(s) à gauche -->
                         @if ($bouteille->cepage)
                             <div class="flex gap-2 text-base">
@@ -90,6 +88,7 @@
                                 </span>
                             </div>
                         @endif
+
                         <!-- Format à droite -->
                         @if ($bouteille->format)
                             <span class="text-sm font-normal">
@@ -98,7 +97,6 @@
                         @endif
                     </div>
                 @endif
-
 
                 <!-- Description à afficher seulement s'il y en a une -->
                 @if (!empty($bouteille->description))
