@@ -107,7 +107,7 @@
                                 <button type="submit"
                                     onclick="return confirm('Supprimer cette bouteille ?')"
                                     class="w-5 h-5 flex items-center justify-center rounded hover:bg-gray-100">
-                                    <img src="{{ asset('images/symbole/symbole-x-noir.svg') }}" class="w-3 h-3">
+                                    <img src="{{ asset('images/symbole/symbole-x-noir.svg') }}" class="w-4 h-4">
                                 </button>
                             </form>
                         </div>
