@@ -11,12 +11,13 @@ class ListeAchatController extends Controller
 {
     public function index(){
         /**
-         * Liste d'achat de l'utilisateur connecté.
+         * Liste d'achat de l'utilisateur connecté avec ses bouteilles.
          */
         $listes = collect();
 
         if (Auth::check()) {
-            $listes = ListeAchat::where('id_utilisateur', Auth::id())
+            $listes = ListeAchat::with('bouteilles') 
+                ->where('id_utilisateur', Auth::id())
                 ->orderBy('nom')
                 ->get();
         }
