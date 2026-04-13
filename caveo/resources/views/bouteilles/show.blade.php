@@ -34,7 +34,7 @@
                 @if ($bouteille->image_pastille)
                     <img src="{{ asset('images/pastilles/' . $bouteille->image_pastille) }}"
                         alt="{{ $bouteille->pastille_gout }}" class="absolute right-8 bottom-4 h-16 w-16 object-contain">
-
+ 
                 @endif
             </div>
             <!-- Détails principaux-->
@@ -66,7 +66,7 @@
                         </span>
                     </div>
                 @endif
-
+ 
                 <!-- Taux d'alcool -->
                 @if ($bouteille->taux_alcool)
                     <div class="flex gap-2 mb-1 text-base">
@@ -76,7 +76,7 @@
                         </span>
                     </div>
                 @endif
-
+ 
                 @if ($bouteille->cepage || $bouteille->format)
                     <div class="flex justify-between items-start mb-1 text-base">
                         <!-- Cépage(s) à gauche -->
@@ -88,7 +88,7 @@
                                 </span>
                             </div>
                         @endif
-
+ 
                         <!-- Format à droite -->
                         @if ($bouteille->format)
                             <span class="text-sm font-normal">
@@ -97,7 +97,7 @@
                         @endif
                     </div>
                 @endif
-
+ 
                 <!-- Description à afficher seulement s'il y en a une -->
                 @if (!empty($bouteille->description))
                     <div class="flex gap-2 mb-1 text-base">
