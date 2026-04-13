@@ -117,6 +117,7 @@ Route::middleware('auth')->group(function () {
 
   Route::delete('/achat/{liste}', [ListeAchatController::class, 'destroy'])->name('achat.destroy'); 
   
+  Route::post('/achat/{liste}/bouteilles', [ListeAchatController::class, 'addBouteille'])->name('achat.bouteilles.add');
 
 });
 
