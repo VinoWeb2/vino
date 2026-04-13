@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
     const modal = document.getElementById("addToCellierModal");
     const overlay = document.getElementById("overlay"); // si tu en as un
-    const closeBtn = document.getElementById("closeModal");
+    const closeBtn = document.getElementById("closeCellierModal");
 
     const bouteilleIdInput = document.getElementById("modalBouteilleId");
     const bouteilleNomText = document.getElementById("modalBouteilleNom");
