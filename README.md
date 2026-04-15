@@ -12,6 +12,7 @@ Application de gestion de cellier développée avec Laravel.
 - Feature fiche détail bouteille
 - Feature cellier
 - Feature liste d'achat
+- Feature ajout de bouteille non listée
 
 ---
 
