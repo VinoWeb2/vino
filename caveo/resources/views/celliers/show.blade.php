@@ -14,17 +14,25 @@
 <script type="module" src="{{ asset('js/confirmation-suppression-bouteille.js') }}"></script>
 <section class="px-4 py-5 pb-48 max-w-5xl mx-auto font-roboto">
 
-    {{-- Header --}}
     <div class="mb-6">
         <div class="flex flex-wrap items-center justify-between gap-4">
             <h1 class="text-3xl text-[#7A1E2E]" style="font-family: 'Crimson Text', serif;">
                 {{ $cellier->nom }}
             </h1>
 
-            <a href="{{ route('catalogue.index') }}"
-                class="bg-[#A83248] text-white px-4 py-3 rounded font-semibold whitespace-nowrap">
-                Ajouter des bouteilles
-            </a>
+            <div class="flex gap-3 flex-wrap">
+
+                <a href="{{ route('catalogue.index') }}"
+                    class="border border-gray-300 px-4 py-3 rounded font-medium">
+                    Choisir une bouteille dans le catalogue
+                </a>
+
+                <a href="{{ route('celliers.bouteilles.create', $cellier) }}"
+                    class="bg-[#A83248] text-white px-4 py-3 rounded font-semibold">
+                    Ajouter une bouteille non listée
+                </a>
+
+            </div>
         </div>
 
         <div class="mt-3 text-sm text-gray-700 space-y-1">
@@ -40,17 +48,15 @@
 
     <x-alerts />
 
-    {{-- Inventaire --}}
     <div class="space-y-4 pb-20">
         @forelse($cellier->inventaires as $inventaire)
         <div class="flex gap-6 mb-6 font-roboto border p-4 rounded bg-white">
-            {{-- Image --}}
+
             <div class="w-[90px] flex justify-center items-center shrink-0">
                 <img src="{{ $inventaire->bouteille->image ?? asset('images/bouteille-vide.png') }}"
                     alt="{{ $inventaire->bouteille->nom ?? 'Bouteille' }}" class="w-auto h-[135px]">
             </div>
 
-            {{-- Contenu --}}
             <div class="flex flex-col justify-between flex-1 min-w-0">
                 <div>
                     <div class="flex justify-between items-start gap-3">
@@ -64,7 +70,7 @@
                         </span>
                         @endif
                     </div>
-                    {{-- Infos sommaires --}}
+
                     <div class="flex items-center text-sm text-gray-600 space-x-2 flex-wrap">
                         @if(!empty($inventaire->bouteille->pays))
                         <p>{{ $inventaire->bouteille->pays }}</p>
@@ -88,7 +94,6 @@
                     </div>
                 </div>
 
-                {{-- Contrôle quantité --}}
                 <div class="mt-4 flex gap-4 items-center justify-between w-full">
                     @if($inventaire->bouteille)
                     <a href="{{ route('bouteilles.show', $inventaire->bouteille->id) }}?source=cellier&inventaire={{ $inventaire->id }}"
@@ -98,7 +103,6 @@
                     </a>
                     @endif
 
-                    {{-- Moins --}}
                     @if($inventaire->quantite == 0)
                     <form method="POST" action="{{ route('inventaires.destroy', $inventaire) }}" class="inline-flex">
                         @csrf
@@ -126,14 +130,12 @@
                     </form>
                     @endif
 
-                    {{-- Quantité affichée --}}
                     <div class="text-center">
                         <span class="text-2xl font-semibold">
                             {{ $inventaire->quantite }}
                         </span>
                     </div>
 
-                    {{-- Plus --}}
                     <form method="POST" action="{{ route('inventaires.updateQuantite', $inventaire) }}">
                         @csrf
                         @method('PATCH')
@@ -147,7 +149,7 @@
                         </button>
                     </form>
                 </div>
-                {{-- Indication quantité --}}
+
                 <div class="mt-1">
 
                     @if($inventaire->quantite > 0)
