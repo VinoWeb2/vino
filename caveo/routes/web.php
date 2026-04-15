@@ -138,6 +138,7 @@ Route::middleware('auth')->group(function () {
   
   Route::get('/profil', [UtilisateurController::class, 'show'])->name('profil.show');
   Route::get('/profil/edit', [UtilisateurController::class, 'edit'])->name('profil.edit');
+  Route::post('/profil', [UtilisateurController::class, 'update'])->name('profil.update');
 });
 
 /**
