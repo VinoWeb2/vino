@@ -39,7 +39,6 @@
             class="w-auto h-[135px]">
     </div>
 
-    {{-- Contenu --}}
     <div class="flex flex-col justify-between flex-1 min-w-0">
         <div>
             <h2 class="font-semibold text-lg break-words">
@@ -62,7 +61,6 @@
             @endif
         </div>
 
-        {{-- Actions --}}
         <div class="mt-3 flex items-center justify-between gap-3">
             <!-- Voir -->
             <a href="{{ route('celliers.show', $cellier) }}"
