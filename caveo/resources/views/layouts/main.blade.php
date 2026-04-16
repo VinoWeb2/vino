@@ -40,8 +40,8 @@
 
             <a href="{{ route('celliers.index') }}" class="flex flex-col items-center gap-1 px-3 py-1">
                 <img src="{{ request()->routeIs('celliers.*')
-            ? asset('images/icons/bouteille-actif.svg')
-            : asset('images/icons/bouteille-inactif.svg') }}" alt="Cellier" class="w-6 h-6">
+            ? asset('images/icons/cellier-actif.svg')
+            : asset('images/icons/cellier-inactif.svg') }}" alt="Cellier" class="w-6 h-6">
                 <p class="text-sm font-roboto font-medium">Cellier</p>
             </a>
 
@@ -53,7 +53,7 @@
                             : asset('images/icons/loop-inactif.svg') }}"
                     alt="Explorer"
                     class="w-6 h-6 object-contain">
-                <p class="text-sm font-roboto font-medium">Bouteilles</p>
+                <p class="text-sm font-roboto font-medium">Catalogue</p>
             </a>
 
             <a href="{{ route('achat.index') }}" class="flex flex-col items-center gap-1 px-3 py-1">
