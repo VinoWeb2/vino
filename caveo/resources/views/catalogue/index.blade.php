@@ -142,6 +142,52 @@
     </div>
 </form>
 
+<div class="m-3 text-sm">
+
+    <!-- Recherche -->
+    @if(request('recherche'))
+        <p>
+            <strong>Recherche en cours :</strong> "{{ request('recherche') }}"
+        </p>
+    @endif
+
+    <!-- Filtres -->
+    @if(
+        request('tri_nom') ||
+        request('types') ||
+        request('pays') ||
+        request('formats') ||
+        request('millesimes')
+    )
+        <p class="mt-1">
+            <strong>Filtres appliqués :</strong>
+        </p>
+
+        <ul class="ml-4 list-disc">
+            @if(request('tri_nom'))
+                <li>Tri : {{ request('tri_nom') }}</li>
+            @endif
+
+            @if(request('types'))
+                <li>Type : {{ implode(', ', request('types')) }}</li>
+            @endif
+
+            @if(request('pays'))
+                <li>Pays : {{ implode(', ', request('pays')) }}</li>
+            @endif
+
+            @if(request('formats'))
+                <li>Quantité : {{ request('formats') }} ml</li>
+            @endif
+
+            @if(request('millesimes'))
+                <li>Millésime : {{ request('millesimes') }}</li>
+            @endif
+        </ul>
+    @endif
+
+</div>
+
 <div class="m-4">
     @if($bouteilles->total() > 0)
     <p>
