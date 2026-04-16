@@ -9,6 +9,7 @@
 @endsection
 
 @section('content')
+
 <script src="{{ asset('js/quantite-form.js') }}"></script>
 
 <div class="m-4">
@@ -25,7 +26,10 @@
 </div>
 
 <div class="m-4 border p-4 mb-24 rounded bg-white font-roboto">
-    <form method="POST" action="{{ route('celliers.bouteilles.store', $cellier) }}" class="flex flex-col gap-5">
+    <form method="POST"
+        action="{{ route('celliers.bouteilles.store', $cellier) }}"
+        enctype="multipart/form-data"
+        class="flex flex-col gap-5">
         @csrf
 
         @include('bouteilles._form')

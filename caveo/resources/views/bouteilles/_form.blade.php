@@ -1,4 +1,3 @@
-{{-- Nom --}}
 <div>
     <label for="nom" class="block mb-1 text-sm font-medium text-[#1A1A1A]">
         Nom de la bouteille <span class="text-red-500">*</span>
@@ -16,7 +15,6 @@
     @enderror
 </div>
 
-{{-- Type --}}
 <div>
     <label for="type" class="block mb-1 text-sm font-medium text-[#1A1A1A]">
         Type
@@ -33,7 +31,6 @@
     @enderror
 </div>
 
-{{-- Pays --}}
 <div>
     <label for="pays" class="block mb-1 text-sm font-medium text-[#1A1A1A]">
         Pays
@@ -50,7 +47,6 @@
     @enderror
 </div>
 
-{{-- Format / Millésime --}}
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
     <div>
         <label for="format" class="block mb-1 text-sm font-medium text-[#1A1A1A]">
@@ -87,7 +83,6 @@
     </div>
 </div>
 
-{{-- Cépage / Prix --}}
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
     <div>
         <label for="cepage" class="block mb-1 text-sm font-medium text-[#1A1A1A]">
@@ -124,7 +119,30 @@
     </div>
 </div>
 
-{{-- Quantité --}}
+{{-- Image --}}
+<div>
+    <label for="image" class="block mb-1 text-sm font-medium text-[#1A1A1A]">
+        Image de la bouteille
+    </label>
+    <input type="file"
+        id="image"
+        name="image"
+        accept="image/*"
+        class="w-full border-2 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E0E0E0] @error('image') border-red-600 @enderror">
+    @error('image')
+    <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+    @enderror
+
+    @if(!empty($bouteille->image))
+    <div class="mt-3">
+        <p class="text-xs text-gray-500 mb-2">Image actuelle :</p>
+        <img src="{{ asset('storage/' . $bouteille->image) }}"
+            alt="{{ $bouteille->nom }}"
+            class="h-28 w-auto rounded border">
+    </div>
+    @endif
+</div>
+
 <div>
     <label class="block mb-2 text-sm font-medium text-[#1A1A1A]">
         Quantité <span class="text-red-500">*</span>
@@ -166,7 +184,6 @@
     @enderror
 </div>
 
-{{-- Description --}}
 <div>
     <label for="description" class="block mb-1 text-sm font-medium text-[#1A1A1A]">
         Description
