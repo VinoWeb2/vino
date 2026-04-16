@@ -2,15 +2,16 @@
 @section('title', 'Liste Achat')
 
 @section('fleche')
-    <!-- Flèche de retour qui revient à la page précédente (Cellier ou Catalogue) permet de garder les filtres de catalogue si besoin -->
-    <a href="{{ url()->previous() }}">
-        <img src="{{ asset('images/fleches/gauche-blanc.svg') }}" alt="Flèche de retour" class="w-10 h-10">
-    </a>
+<!-- Flèche de retour qui revient à la page précédente (Cellier ou Catalogue) permet de garder les filtres de catalogue si besoin -->
+<a href="{{ url()->previous() }}">
+    <img src="{{ asset('images/fleches/gauche-blanc.svg') }}" alt="Flèche de retour" class="w-10 h-10">
+</a>
 @endsection
 
 @section('content')
 <script type="module" src="{{ asset('js/liste-dropdown.js') }}"></script>
 <script type="module" src="{{ asset('js/message-flash-auto.js') }}"></script>
+<script type="module" src="{{ asset('js/confirmation-suppression.js') }}"></script>
 
 <div class="m-4 flex items-start justify-between gap-4">
     <div>
@@ -53,9 +54,9 @@
                 </h2>
 
                 @if(!empty($liste->description))
-                    <p class="text-sm text-gray-600 truncate">
-                        {{ $liste->description }}
-                    </p>
+                <p class="text-sm text-gray-600 truncate">
+                    {{ $liste->description }}
+                </p>
                 @endif
             </div>
 
@@ -72,8 +73,7 @@
                     @method('DELETE')
 
                     <button type="submit"
-                        onclick="return confirm('Supprimer cette liste ?')"
-                        class="w-10 h-10 flex items-center justify-center border rounded hover:bg-gray-100">
+                        class="bouton-supprimer w-10 h-10 flex items-center justify-center border rounded hover:bg-gray-100 data-confirm=" Supprimer cette liste ?" aria-label="Supprimer la liste">
                         <img src="{{ asset('images/icons/poubelle.svg') }}" class="w-6 h-6">
                     </button>
                 </form>
@@ -85,33 +85,32 @@
         <!-- CONTENUE DROPDOWN -->
         <div id="liste-{{ $liste->id }}" class="hidden border-t p-4">
             @if($liste->bouteilles->isEmpty())
-                <p class="text-sm text-gray-500">
-                    Aucune bouteille dans cette liste
-                </p>
+            <p class="text-sm text-gray-500">
+                Aucune bouteille dans cette liste
+            </p>
             @else
-                <div class="space-y-2">
+            <div class="space-y-2">
                 @foreach($liste->bouteilles as $bouteille)
-                    <div class="flex justify-between items-start border rounded p-2 gap-4">
-                        <span class="flex-1 break-words">
-                            {{ $bouteille->nom }}
-                        </span>
-                        
-                        <div class="flex items-center gap-4 shrink-0">
-                            <span class="text-sm text-gray-600 whitespace-nowrap">
-                                x{{ $bouteille->pivot->quantite }}
-                            </span>
-                            <form method="POST" action="{{ route('achat.bouteilles.destroy', [$liste->id, $bouteille->id]) }}">
-                                @csrf
-                                @method('DELETE')
+                <div class="flex justify-between items-start border rounded p-2 gap-4">
+                    <span class="flex-1 break-words">
+                        {{ $bouteille->nom }}
+                    </span>
 
-                                <button type="submit"
-                                    onclick="return confirm('Supprimer cette bouteille ?')"
-                                    class="w-5 h-5 flex items-center justify-center rounded hover:bg-gray-100">
-                                    <img src="{{ asset('images/symbole/symbole-x-noir.svg') }}" class="w-4 h-4">
-                                </button>
-                            </form>
-                        </div>
+                    <div class="flex items-center gap-4 shrink-0">
+                        <span class="text-sm text-gray-600 whitespace-nowrap">
+                            x{{ $bouteille->pivot->quantite }}
+                        </span>
+                        <form method="POST" action="{{ route('achat.bouteilles.destroy', [$liste->id, $bouteille->id]) }}">
+                            @csrf
+                            @method('DELETE')
+
+                            <button type="submit"
+                                class="bouton-supprimer" w-5 h-5 flex items-center justify-center rounded hover:bg-gray-100 data-confirm=" Supprimer cette bouteille ?" aria-label="Supprimer la bouteille">
+                                <img src="{{ asset('images/symbole/symbole-x-noir.svg') }}" class="w-4 h-4">
+                            </button>
+                        </form>
                     </div>
+                </div>
                 @endforeach
             </div>
             @endif
