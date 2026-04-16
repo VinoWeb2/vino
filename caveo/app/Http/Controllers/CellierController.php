@@ -212,12 +212,9 @@ class CellierController extends Controller
      */
     private function verifierProprietaire(Cellier $cellier): void
     {
-        $utilisateur = Auth::user();
-
         abort_if(
-            $cellier->id_utilisateur !== $utilisateur->id,
-            403,
-            'Accès non autorisé à ce cellier.'
+            $cellier->id_utilisateur !== Auth::id(),
+            403
         );
     }
 }
