@@ -146,6 +146,11 @@ Route::middleware('auth')->group(function () {
 
   Route::get('/profil/password', [UtilisateurController::class, 'editPassword'])->name('profil.password.edit');
   Route::post('/profil/password', [UtilisateurController::class, 'updatePassword'])->name('profil.password.update');
+
+  /**
+   * Route pour supprimer son compte
+   */
+  Route::delete('/profil', [UtilisateurController::class, 'destroy'])->name('profil.destroy');
 });
 
 /**
