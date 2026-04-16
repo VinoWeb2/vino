@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminUtilisateurController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BouteilleController;
 use App\Http\Controllers\CatalogueController;
@@ -137,4 +138,16 @@ Route::middleware('auth')->group(function () {
 
   Route::patch('/achat/{liste}/bouteilles/{bouteille}/quantite', [ListeAchatController::class, 'updateQuantite'])
     ->name('achat.bouteilles.updateQuantite');
+
+  /*
+    |--------------------------------------------------------------------------
+    | Administration (rôle admin requis)
+    |--------------------------------------------------------------------------
+    */
+
+  Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
+
+    Route::resource('utilisateurs', AdminUtilisateurController::class)
+      ->only(['index', 'edit', 'update']);
+  });
 });

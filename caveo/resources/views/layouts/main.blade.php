@@ -45,47 +45,70 @@
     </main>
 
     @if(Auth::check())
-    <footer
-        class="bg-[#FCF8F7] text-black fixed bottom-3 left-3 right-3 rounded-xl shadow-2xl ring-1 ring-gray-300 py-2">
-        <div class="flex justify-around text-center">
-            <a href="{{ route('accueil') }}" class="flex flex-col items-center gap-1 px-3 py-1 invisible">
-                <img src="{{ request()->routeIs('accueil')
-            ? asset('images/icons/home-actif.svg')
-            : asset('images/icons/home-inactif.svg') }}" alt="Explorer" class="w-6 h-6 object-contain">
-                <p class="text-sm font-roboto font-medium">Accueil</p>
-            </a>
+        @if(optional(Auth::user()->role)->nom === 'admin')
+        {{-- Footer administrateur --}}
+        <footer
+            class="bg-[#FCF8F7] text-black fixed bottom-3 left-3 right-3 rounded-xl shadow-2xl ring-1 ring-gray-300 py-2">
+            <div class="flex justify-around text-center">
+                <a href="{{ route('accueil') }}" class="flex flex-col items-center gap-1 px-3 py-1">
+                    <img src="{{ request()->routeIs('accueil')
+                        ? asset('images/icons/home-actif.svg')
+                        : asset('images/icons/home-inactif.svg') }}" alt="Accueil" class="w-6 h-6 object-contain">
+                    <p class="text-sm font-roboto font-medium">Accueil</p>
+                </a>
 
-            <a href="{{ route('celliers.index') }}" class="flex flex-col items-center gap-1 px-3 py-1">
-                <img src="{{ request()->routeIs('celliers.*')
-            ? asset('images/icons/cellier-actif.svg')
-            : asset('images/icons/cellier-inactif.svg') }}" alt="Cellier" class="w-6 h-6">
-                <p class="text-sm font-roboto font-medium">Cellier</p>
-            </a>
+                <a href="{{ route('admin.utilisateurs.index') }}" class="flex flex-col items-center gap-1 px-3 py-1">
+                    <img src="{{ request()->routeIs('admin.utilisateurs.*')
+                        ? asset('images/icons/profil-actif.svg')
+                        : asset('images/icons/profil-inactif.svg') }}" alt="Utilisateurs" class="w-6 h-6 object-contain">
+                    <p class="text-sm font-roboto font-medium">Utilisateurs</p>
+                </a>
+            </div>
+        </footer>
+        @else
+        {{-- Footer utilisateur --}}
+        <footer
+            class="bg-[#FCF8F7] text-black fixed bottom-3 left-3 right-3 rounded-xl shadow-2xl ring-1 ring-gray-300 py-2">
+            <div class="flex justify-around text-center">
+                <a href="{{ route('accueil') }}" class="flex flex-col items-center gap-1 px-3 py-1 invisible">
+                    <img src="{{ request()->routeIs('accueil')
+                ? asset('images/icons/home-actif.svg')
+                : asset('images/icons/home-inactif.svg') }}" alt="Explorer" class="w-6 h-6 object-contain">
+                    <p class="text-sm font-roboto font-medium">Accueil</p>
+                </a>
+
+                <a href="{{ route('celliers.index') }}" class="flex flex-col items-center gap-1 px-3 py-1">
+                    <img src="{{ request()->routeIs('celliers.*')
+                ? asset('images/icons/cellier-actif.svg')
+                : asset('images/icons/cellier-inactif.svg') }}" alt="Cellier" class="w-6 h-6">
+                    <p class="text-sm font-roboto font-medium">Cellier</p>
+                </a>
 
 
-            <a href="{{ route('catalogue.index') }}" class="flex flex-col items-center gap-1 px-3 py-1">
-                <img
-                    src="{{ request()->routeIs('catalogue.index') 
-                            ? asset('images/icons/loop-actif.svg') 
-                            : asset('images/icons/loop-inactif.svg') }}"
-                    alt="Explorer"
-                    class="w-6 h-6 object-contain">
-                <p class="text-sm font-roboto font-medium">Catalogue</p>
-            </a>
+                <a href="{{ route('catalogue.index') }}" class="flex flex-col items-center gap-1 px-3 py-1">
+                    <img
+                        src="{{ request()->routeIs('catalogue.index')
+                                ? asset('images/icons/loop-actif.svg')
+                                : asset('images/icons/loop-inactif.svg') }}"
+                        alt="Explorer"
+                        class="w-6 h-6 object-contain">
+                    <p class="text-sm font-roboto font-medium">Catalogue</p>
+                </a>
 
-            <a href="{{ route('achat.index') }}" class="flex flex-col items-center gap-1 px-3 py-1">
-                <img src="{{ request()->routeIs('achat.index') 
-                            ? asset('images/icons/liste-actif.svg') 
-                            : asset('images/icons/liste.svg') }}" alt="Liste achat" class="w-6 h-6">
-                <p class="text-sm font-roboto font-medium wrap">Liste d'achat</p>
-            </a>
+                <a href="{{ route('achat.index') }}" class="flex flex-col items-center gap-1 px-3 py-1">
+                    <img src="{{ request()->routeIs('achat.index')
+                                ? asset('images/icons/liste-actif.svg')
+                                : asset('images/icons/liste.svg') }}" alt="Liste achat" class="w-6 h-6">
+                    <p class="text-sm font-roboto font-medium wrap">Liste d'achat</p>
+                </a>
 
-            <a href="#" class="flex flex-col items-center gap-1 px-3 py-1 ">
-                <img src="{{ asset('images/icons/profil-inactif.svg') }}" alt="Profil" class="w-6 h-6">
-                <p class="text-sm font-roboto font-medium">Profil</p>
-            </a>
-        </div>
-    </footer>
+                <a href="#" class="flex flex-col items-center gap-1 px-3 py-1 ">
+                    <img src="{{ asset('images/icons/profil-inactif.svg') }}" alt="Profil" class="w-6 h-6">
+                    <p class="text-sm font-roboto font-medium">Profil</p>
+                </a>
+            </div>
+        </footer>
+        @endif
     @endif
 </body>
 

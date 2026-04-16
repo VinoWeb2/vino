@@ -53,6 +53,10 @@ class AuthController extends Controller
 
         Auth::login($utilisateur);
 
+        if (optional($utilisateur->role)->nom === 'admin') {
+            return redirect()->route('admin.utilisateurs.index');
+        }
+
         return redirect()->route('celliers.index')->withSuccess('Connexion réussie!');
     }
 
