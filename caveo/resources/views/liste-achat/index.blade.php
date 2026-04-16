@@ -97,9 +97,26 @@
                     </a>
 
                     <div class="flex items-center gap-4 shrink-0">
-                        <span class="text-sm text-gray-600 whitespace-nowrap">
-                            x{{ $bouteille->pivot->quantite }}
-                        </span>
+                        <form method="POST" action="{{ route('achat.bouteilles.updateQuantite', [$liste->id, $bouteille->id]) }}">
+                            @csrf
+                            @method('PATCH')
+
+                            <div class="flex items-center gap-2">
+                                <button type="submit" name="action" value="decrement" class="w-3 h-5 flex items-center justify-center rounded text-lg">
+                                    <img src="{{ asset('images/symbole/diminuer-noir.svg') }}" alt="Diminuer">
+                                </button>
+
+                                <!-- quantité -->
+                               <span class="w-6 text-center text-sm text-gray-700 font-bold">
+                                    {{ $bouteille->pivot->quantite }}
+                                </span>
+
+                                <button type="submit" name="action" value="increment" class="w-3 h-5 flex items-center justify-center rounded text-lg">
+                                    <img src="{{ asset('images/symbole/augmenter-noir.svg') }}" alt="Augmenter">
+                                </button>
+
+                            </div>
+                        </form>
                         <form method="POST" action="{{ route('achat.bouteilles.destroy', [$liste->id, $bouteille->id]) }}">
                             @csrf
                             @method('DELETE')
